@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-black text-white;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* شريط التمرير */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* ✅ إعداد خريطة Leaflet فقط */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+.leaflet-container img.leaflet-tile {
+  max-width: none !important;
+}
+/* إخفاء أي أيقونة Marker افتراضية من Leaflet */
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  display: none !important;
+}
+/* دبوس نبض لموقع المستخدم في خريطة مسار */
+.pulse-marker-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.pulse-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #22c55e;
+  border: 2px solid #bbf7d0;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: pulse-marker-animation 1.5s infinite;
+}
+
+@keyframes pulse-marker-animation {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 14px rgba(34, 197, 94, 0);
+  }
+  100% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
