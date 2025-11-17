@@ -1,146 +1,136 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-// نفس منطق التحويل المستخدم في التسجيل
-function normalizePhone(phone: string) {
-  const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
-  const englishDigits = "0123456789";
-
-  const converted = phone.replace(/[٠-٩]/g, (d) => {
-    const index = arabicDigits.indexOf(d);
-    return index !== -1 ? englishDigits[index] : d;
-  });
-
-  return converted.replace(/[^0-9+]/g, "");
-}
-
-function emailFromPhone(phone: string) {
-  const normalized = normalizePhone(phone);
-  const localPart = normalized ? `u${normalized}` : "phone";
-  return `${localPart}@masar.app`;
-}
-
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const params = useSearchParams();
+  const searchParams = useSearchParams();
 
-  const [identifier, setIdentifier] = useState("");
+  const from = searchParams.get("from");
+  const loggedOut = searchParams.get("logged_out");
+  const errorParam = searchParams.get("error");
+
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const from = params.get("from") || "/dashboard";
-  const loggedOut = params.get("logged_out");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!identifier.trim() || !password) {
-      setError("فضلاً أدخل رقم الجوال أو البريد وكلمة المرور.");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      let emailToUse: string;
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (identifier.includes("@")) {
-        emailToUse = identifier.trim();
-      } else {
-        emailToUse = emailFromPhone(identifier);
+      if (signInError || !data.session) {
+        throw signInError || new Error("تعذر تسجيل الدخول.");
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: emailToUse,
-        password,
-      });
-
-      if (signInError) {
-        console.error("Supabase signIn error:", signInError);
-        setError("بيانات الدخول غير صحيحة، تأكد من المدخلات.");
-        return;
-      }
-
-      router.replace(from);
-    } catch (err) {
-      console.error("Unexpected login error:", err);
-      setError("حدث خطأ غير متوقع أثناء تسجيل الدخول.");
+      // لو فيه from نرجع له، غير كذا نروح للداشبورد
+      router.replace(from || "/dashboard");
+    } catch (err: any) {
+      setError(err?.message || "حدث خطأ غير متوقع أثناء تسجيل الدخول.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-3xl bg-black/70 border border-white/10 p-6 space-y-6">
-        <div>
-          <h1 className="text-xl font-bold mb-1">تسجيل الدخول إلى مسار</h1>
-          <p className="text-xs text-white/60">
-            يمكنك استخدام البريد الإلكتروني أو رقم الجوال الذي سجلت به، مع كلمة
-            المرور، للوصول إلى لوحة التحكم ومزارعك.
-          </p>
-          {loggedOut && (
-            <p className="mt-2 text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-500/40 rounded-xl px-3 py-2">
-              تم تسجيل خروجك بنجاح.
-            </p>
-          )}
+    <section className="mx-auto mt-24 max-w-md rounded-3xl bg-black/70 border border-white/10 px-6 py-7 text-white space-y-5">
+      <div>
+        <h1 className="text-xl font-bold mb-1">تسجيل الدخول لحسابك</h1>
+        <p className="text-xs text-white/60">
+          أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى لوحـة تحكم مزارعك في مسار.
+        </p>
+      </div>
+
+      {(loggedOut || errorParam || error) && (
+        <div
+          className={`text-xs rounded-2xl px-3 py-2 border ${
+            loggedOut
+              ? "bg-emerald-500/10 border-emerald-400/60 text-emerald-100"
+              : "bg-red-500/10 border-red-400/60 text-red-100"
+          }`}
+        >
+          {loggedOut && "تم تسجيل خروجك بنجاح من الحساب."}
+          {errorParam && !loggedOut && "انتهت صلاحية الجلسة، فضلاً قم بتسجيل الدخول مجددًا."}
+          {error && !loggedOut && !errorParam && error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4 text-sm">
+        <div className="space-y-1">
+          <label className="block text-xs text-white/70">البريد الإلكتروني</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
+            placeholder="example@domain.com"
+          />
         </div>
 
-        {error && (
-          <p className="text-[11px] text-red-300 bg-red-500/10 border border-red-500/40 rounded-xl px-3 py-2">
-            {error}
+        <div className="space-y-1">
+          <label className="block text-xs text-white/70">كلمة المرور</label>
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full mt-2 rounded-xl bg-[#0058E6] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {loading ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
+        </button>
+      </form>
+
+      <p className="text-[11px] text-white/50">
+        ليس لديك حساب؟ يمكنك إنشاء حساب جديد من صفحة التسجيل.
+      </p>
+    </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-[#050814] via-[#02040b] to-black text-white">
+      <div className="mx-auto max-w-5xl px-4 pt-20 pb-16">
+        <div className="mb-6">
+          <p className="text-xs uppercase tracking-[0.25em] text-white/40 mb-2">
+            مسار · نظام إدارة المزارع الذكي
           </p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4 text-sm">
-          <div className="space-y-1">
-            <label className="block text-xs text-white/70">
-              البريد الإلكتروني أو رقم الجوال
-            </label>
-            <input
-              type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
-              placeholder="example@mail.com أو 05xxxxxxxx"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="block text-xs text-white/70">كلمة المرور</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-[#0058E6] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? "جاري تسجيل الدخول..." : "دخول إلى لوحة التحكم"}
-          </button>
-
-          <p className="text-[11px] text:white/50 text-center mt-1">
-            ليس لديك حساب؟{" "}
-            <button
-              type="button"
-              onClick={() => router.push("/auth/register")}
-              className="text-[#4BA3FF] hover:underline"
-            >
-              إنشاء حساب جديد
-            </button>
+          <h2 className="text-2xl md:text-3xl font-bold">
+            أهلاً برجوعك إلى <span className="text-[#4BA3FF]">مسار</span> 👋
+          </h2>
+          <p className="text-xs md:text-sm text-white/60 mt-1">
+            سجّل الدخول لمتابعة مراقبة مزارعك، حقولك، وتوصيات الري والعناية بالنباتات.
           </p>
-        </form>
+        </div>
+
+        <Suspense
+          fallback={
+            <div className="mt-16 text-center text-sm text-white/60">
+              جارٍ تجهيز صفحة تسجيل الدخول...
+            </div>
+          }
+        >
+          <LoginForm />
+        </Suspense>
       </div>
     </main>
   );
