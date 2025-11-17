@@ -33,9 +33,15 @@ export default function NewFieldPage() {
   const [ratingMessage, setRatingMessage] = useState<string | null>(null);
 
   const handleFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files || []);
-    setFiles(selected);
-  };
+  const selected = Array.from(e.target.files || []);
+  if (!selected.length) return;
+
+  setFiles((prev) => {
+    // ندمج الصور السابقة مع الجديدة
+    return [...prev, ...selected];
+  });
+};
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -409,7 +415,6 @@ export default function NewFieldPage() {
               <input
                 type="file"
                 accept="image/*"
-                capture="environment"
                 multiple
                 onChange={handleFilesChange}
                 className="w-full rounded-xl bg-black/40 border border-dashed border-white/25 px-3 py-3 text-xs file:mr-3 file:rounded-lg file:border-none file:bg-[#0058E6] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:border-[#4BA3FF]"
