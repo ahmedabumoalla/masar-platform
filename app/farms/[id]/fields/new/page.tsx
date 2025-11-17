@@ -57,9 +57,9 @@ export default function NewFieldPage() {
       return;
     }
 
-    if (files.length < 6) {
+    if (files.length < 1) {
       setError(
-        "يجب رفع 6 صور على الأقل للنباتات في هذا الحقل لتحليلها بالذكاء الاصطناعي."
+        "يجب رفع صورة واحدة على الأقل"
       );
       return;
     }

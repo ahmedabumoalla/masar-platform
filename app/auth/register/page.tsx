@@ -1,13 +1,11 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("from") || "/dashboard";
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +42,7 @@ export default function RegisterPage() {
     try {
       setLoading(true);
 
-      // ✅ تسجيل بالحساب باستخدام البريد فقط (بدون رقم جوال نهائياً)
+      // ✅ تسجيل باستخدام البريد فقط
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -65,9 +63,9 @@ export default function RegisterPage() {
         return;
       }
 
-      // بعد إنشاء الحساب يوجهه لصفحة الدخول
+      // بعد التسجيل نروح مباشرة لصفحة تسجيل الدخول
       router.replace("/auth/login?registered=1");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setError("حدث خطأ غير متوقع أثناء إنشاء الحساب.");
       setLoading(false);
@@ -117,7 +115,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* ✅ لا يوجد أي حقل لرقم الجوال هنا */}
+          {/* ✅ لا يوجد رقم جوال */}
 
           <div className="space-y-1">
             <label className="block text-xs text-white/70">
