@@ -700,7 +700,7 @@ if (farmIds.length > 0) {
                               {farmFields.length > 0 && (
                                 <div className="border-t border-white/10 px-3 py-3 bg-black/40">
                                   <p className="text-[11px] text-white/60 mb-2">
-                                    معاينة سريعة لأحدث تقارير الحقول في هذه
+                                    قم بمعاينة سريعة لأحدث تقارير الحقول في هذه
                                     المزرعة:
                                   </p>
                                   <div className="space-y-2">
