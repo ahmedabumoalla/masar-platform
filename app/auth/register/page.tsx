@@ -53,7 +53,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // لو التفعيل عبر رابط إيميل
       if (data.user && !data.session) {
         setSuccessMsg(
           "تم إنشاء الحساب بنجاح، فضلاً تحقق من بريدك الإلكتروني لتفعيل الحساب ثم سجّل دخولك."
@@ -62,11 +61,10 @@ export default function RegisterPage() {
         setSuccessMsg("تم إنشاء الحساب بنجاح.");
       }
 
-      // نوديه لصفحة تسجيل الدخول بعد ثواني بسيطة
       setTimeout(() => {
         router.replace("/auth/login?registered=1");
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setErrorMsg("حدث خطأ غير متوقع أثناء إنشاء الحساب.");
     } finally {
