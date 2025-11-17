@@ -1,5 +1,6 @@
 "use client";
 
+import type { LeafletMouseEvent } from "leaflet";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -34,7 +35,7 @@ function LocationMarker({
 }) {
   // أي كليك على الخريطة يحرك الدبوس
   useMapEvents({
-    click(e) {
+    click(e: any) {
       setPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
     },
   });
