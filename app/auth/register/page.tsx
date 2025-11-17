@@ -1,11 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState, FormEvent, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function RegisterPage() {
+// الكومبوننت الأساسي للصفحة
+function RegisterPageInner() {
   const router = useRouter();
 
   const [fullName, setFullName] = useState("");
@@ -159,5 +160,22 @@ export default function RegisterPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+// الواجهة المصدّرة مع Suspense
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#020617] text-white flex items-center justify-center">
+          <p className="text-sm text-white/70">
+            جاري تحميل صفحة إنشاء الحساب...
+          </p>
+        </main>
+      }
+    >
+      <RegisterPageInner />
+    </Suspense>
   );
 }
