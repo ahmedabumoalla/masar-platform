@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function RegisterPage() {
@@ -10,158 +11,154 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    if (!fullName.trim()) {
-      setError("فضلاً أدخل اسمك الثلاثي.");
-      return;
-    }
+    setErrorMsg(null);
+    setSuccessMsg(null);
 
     if (!email.trim()) {
-      setError("فضلاً أدخل البريد الإلكتروني.");
+      setErrorMsg("فضلاً أدخل البريد الإلكتروني.");
       return;
     }
 
-    if (password.length < 6) {
-      setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
-      return;
-    }
-
-    if (password !== passwordConfirm) {
-      setError("تأكيد كلمة المرور لا يطابق كلمة المرور.");
+    if (!password || password.length < 6) {
+      setErrorMsg("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // ✅ تسجيل باستخدام البريد فقط
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: fullName || null,
           },
         },
       });
 
-      if (signUpError) {
-        console.error(signUpError);
-        setError(
-          signUpError.message ||
-            "تعذر إنشاء الحساب حالياً، حاول مرة أخرى لاحقاً."
+      if (error) {
+        console.error("signUp error:", error);
+        setErrorMsg(
+          error.message || "تعذر إنشاء الحساب، حاول مرة أخرى بعد قليل."
         );
         setLoading(false);
         return;
       }
 
-      // بعد التسجيل نروح مباشرة لصفحة تسجيل الدخول
-      router.replace("/auth/login?registered=1");
-    } catch (err) {
+      // لو التفعيل عبر رابط إيميل
+      if (data.user && !data.session) {
+        setSuccessMsg(
+          "تم إنشاء الحساب بنجاح، فضلاً تحقق من بريدك الإلكتروني لتفعيل الحساب ثم سجّل دخولك."
+        );
+      } else {
+        setSuccessMsg("تم إنشاء الحساب بنجاح.");
+      }
+
+      // نوديه لصفحة تسجيل الدخول بعد ثواني بسيطة
+      setTimeout(() => {
+        router.replace("/auth/login?registered=1");
+      }, 1500);
+    } catch (err: any) {
       console.error(err);
-      setError("حدث خطأ غير متوقع أثناء إنشاء الحساب.");
+      setErrorMsg("حدث خطأ غير متوقع أثناء إنشاء الحساب.");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#020617] via-[#050816] to-black text-white flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-3xl bg-black/70 border border-white/10 p-6 md:p-7 shadow-2xl shadow-black/60">
-        <h1 className="text-xl md:text-2xl font-bold mb-2 text-center">
-          إنشاء حساب جديد في مسار
-        </h1>
-        <p className="text-xs md:text-sm text-white/60 text-center mb-5">
-          أدخل بياناتك لإنشاء حساب وإدارة مزارعك وحقولك من لوحة التحكم.
-        </p>
-
-        {error && (
-          <div className="mb-4 rounded-2xl bg-red-500/10 border border-red-500/40 px-3 py-2 text-xs md:text-sm text-red-200">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3 text-sm">
-          <div className="space-y-1">
-            <label className="block text-xs text-white/70">
-              الاسم الكامل (سيظهر في لوحة التحكم)
-            </label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
-              placeholder="مثال: عبدالله أبو معلا"
-            />
+    <main className="min-h-screen bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white">
+      <div className="mx-auto max-w-md px-4 pt-24 pb-16 space-y-6">
+        <section className="rounded-3xl bg-black/70 border border-white/10 p-6 md:p-7 space-y-5">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold mb-1">
+              إنشاء حساب جديد في مسار
+            </h1>
+            <p className="text-xs md:text-sm text-white/60">
+              استخدم بريدك الإلكتروني لإنشاء حساب مزارع، ويمكنك لاحقًا ربط
+              مزارعك وحقولك ورفع صور النباتات لتحليلها بالذكاء الاصطناعي.
+            </p>
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-xs text-white/70">
-              البريد الإلكتروني
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
-              placeholder="example@domain.com"
-            />
-          </div>
+          {errorMsg && (
+            <div className="rounded-2xl bg-red-500/10 border border-red-500/40 px-4 py-3 text-sm text-red-200">
+              {errorMsg}
+            </div>
+          )}
 
-          {/* ✅ لا يوجد رقم جوال */}
+          {successMsg && (
+            <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/40 px-4 py-3 text-sm text-emerald-200">
+              {successMsg}
+            </div>
+          )}
 
-          <div className="space-y-1">
-            <label className="block text-xs text-white/70">
-              كلمة المرور
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
-              placeholder="••••••••"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4 text-sm">
+            <div className="space-y-1">
+              <label className="block text-xs text-white/70">
+                الاسم الكامل (اختياري)
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
+                placeholder="مثال: عبد الله أبو معلا"
+              />
+            </div>
 
-          <div className="space-y-1">
-            <label className="block text-xs text-white/70">
-              تأكيد كلمة المرور
-            </label>
-            <input
-              type="password"
-              value={passwordConfirm}
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-              className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
-              placeholder="أعد كتابة كلمة المرور"
-            />
-          </div>
+            <div className="space-y-1">
+              <label className="block text-xs text-white/70">
+                البريد الإلكتروني
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
+                placeholder="example@farm.com"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-3 w-full rounded-xl bg-[#0058E6] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
-          </button>
-        </form>
+            <div className="space-y-1">
+              <label className="block text-xs text-white/70">
+                كلمة المرور
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
+                placeholder="6 أحرف على الأقل"
+              />
+            </div>
 
-        <p className="mt-4 text-[11px] text-white/60 text-center">
-          لديك حساب مسبقاً؟{" "}
-          <button
-            type="button"
-            onClick={() => router.push("/auth/login")}
-            className="text-[#4BA3FF] hover:underline"
-          >
-            تسجيل الدخول
-          </button>
-        </p>
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 w-full rounded-xl bg-[#0058E6] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب"}
+            </button>
+          </form>
+
+          <p className="text-[11px] text-white/60 text-center mt-2">
+            لديك حساب سابق؟{" "}
+            <Link
+              href="/auth/login"
+              className="text-[#4BA3FF] hover:underline"
+            >
+              سجّل الدخول من هنا
+            </Link>
+          </p>
+        </section>
       </div>
     </main>
   );
