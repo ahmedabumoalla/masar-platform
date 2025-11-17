@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
+// نجبر الصفحة تكون ديناميكية وما يحاول يسوي لها prerender
+export const dynamic = "force-dynamic";
+
 // الكومبوننت الأساسي للصفحة
 function RegisterPageInner() {
   const router = useRouter();
