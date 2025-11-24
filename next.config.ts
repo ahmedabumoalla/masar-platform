@@ -1,8 +1,29 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
-  // لا تحط basePath أو assetPrefix حالياً
+  images: {
+    domains: [
+      "jajuvaijwgfepzrvqzrxx.supabase.co",
+      "qzxxfzdpqjfijjwqkmib.supabase.co",
+      "supabase.co",
+      "supabase.in",
+      "supabase.net"
+    ],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "**.supabase.in",
+      },
+      {
+        protocol: "https",
+        hostname: "**.supabase.net",
+      }
+    ],
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

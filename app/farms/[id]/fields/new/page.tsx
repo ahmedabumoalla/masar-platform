@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState, ChangeEvent } from "react";
+import { FormEvent, useState, ChangeEvent, useEffect } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -12,6 +12,8 @@ export default function NewFieldPage() {
   const farmIdFromRoute = (params?.farmId as string) || (params?.id as string);
   const farmIdFromQuery = searchParams.get("farmId");
   const farmId = farmIdFromRoute || farmIdFromQuery || null;
+
+  const [farmName, setFarmName] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [cropType, setCropType] = useState("");
@@ -32,16 +34,35 @@ export default function NewFieldPage() {
   const [rating, setRating] = useState<number | null>(null);
   const [ratingMessage, setRatingMessage] = useState<string | null>(null);
 
+  // 🟢 جلب اسم المزرعة (اختياري لعرضه في الهيدر)
+  useEffect(() => {
+    const loadFarmName = async () => {
+      try {
+        if (!farmId) return;
+
+        const { data, error } = await supabase
+          .from("farms")
+          .select("name")
+          .eq("id", farmId)
+          .single();
+
+        if (!error && data) {
+          setFarmName(data.name || null);
+        }
+      } catch (err) {
+        console.error("Error loading farm name:", err);
+      }
+    };
+
+    loadFarmName();
+  }, [farmId]);
+
   const handleFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
-  const selected = Array.from(e.target.files || []);
-  if (!selected.length) return;
+    const selected = Array.from(e.target.files || []);
+    if (!selected.length) return;
 
-  setFiles((prev) => {
-    // ندمج الصور السابقة مع الجديدة
-    return [...prev, ...selected];
-  });
-};
-
+    setFiles((prev) => [...prev, ...selected]);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -63,10 +84,8 @@ export default function NewFieldPage() {
       return;
     }
 
-    if (files.length < 1) {
-      setError(
-        "يجب رفع صورة واحدة على الأقل"
-      );
+    if (files.length < 3) {
+      setError("يجب رفع 3 صور على الأقل من هذا الحقل.");
       return;
     }
 
@@ -101,7 +120,8 @@ export default function NewFieldPage() {
           name,
           crop_type: cropType || null,
           notes: notes || null,
-          last_watering_at: lastWatering || null, // 🆕 تخزين آخر ري
+          // نخزن التاريخ كما هو (نص) – يكفي اليوم للتوصيات
+          last_watering_at: lastWatering || null,
         })
         .select("id")
         .single();
@@ -178,7 +198,7 @@ export default function NewFieldPage() {
             imageUrls: publicUrls,
             cropType,
             fieldName: name,
-            farmName: null,
+            farmName: farmName || null,
             notes: notes || null,
             last_watering_at: lastWatering || null,
           }),
@@ -287,7 +307,7 @@ export default function NewFieldPage() {
           imageUrls: lastImageUrls,
           cropType,
           fieldName: name,
-          farmName: null,
+          farmName: farmName || null,
           notes: notes || null,
           last_watering_at: lastWatering || null,
         }),
@@ -321,79 +341,72 @@ export default function NewFieldPage() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-56px)] bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white">
+    <main className="min-h-[calc(100vh-56px)] bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-3xl px-4 pt-24 pb-16 space-y-6">
-        <section className="rounded-3xl bg-black/70 border border-white/10 p-6 md:p-7 space-y-5">
+        <section className="rounded-3xl bg-white border border-slate-200 p-6 md:p-7 space-y-5 shadow-sm">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold mb-1">
+            <h1 className="text-xl md:text-2xl font-bold mb-1 text-slate-900">
               إضافة حقل جديد للمزرعة
             </h1>
-            <p className="text-xs md:text-sm text-white/60">
-              عرّف الحقل، اختر نوع المحصول، ثم التقط أو ارفع 6 صور على الأقل
-              للنباتات ليقوم المساعد الذكي بتحليل حالتها واقتراح حلول عملية.
+            <p className="text-xs md:text-sm text-slate-600">
+              المزرعة:{" "}
+              <span className="font-semibold text-slate-900">
+                {farmName || "لم يتم تحديد اسم المزرعة"}
+              </span>
+            </p>
+            <p className="mt-2 text-xs md:text-sm text-slate-600">
+              عرّف الحقل، اختر نوع المحصول، ثم التقط أو ارفع{" "}
+              <span className="font-semibold">3 صور على الأقل</span> للنباتات
+              ليقوم المساعد الذكي بتحليل حالتها واقتراح حلول عملية.
             </p>
           </div>
 
           {error && (
-            <div className="rounded-2xl bg-red-500/10 border border-red-500/40 px-4 py-3 text-sm text-red-200">
+            <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 text-sm">
             <div className="space-y-1">
-              <label className="block text-xs text-white/70">اسم الحقل</label>
+              <label className="block text-xs text-slate-700">اسم الحقل</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 focus:outline-none focus:border-[#0058E6]"
                 placeholder="مثال: حقل الخضروات الموسمية"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="block text-xs text-white/70">
+              <label className="block text-xs text-slate-700">
                 نوع المحصول الأساسي في الحقل
               </label>
-              <select
+              <input
+                type="text"
                 value={cropType}
                 onChange={(e) => setCropType(e.target.value)}
-                className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 focus:outline-none focus:border-[#4BA3FF]"
-              >
-                <option value="">اختر نوع المحصول (اختياري)</option>
-                <option value="أشجار فواكه">أشجار فواكه</option>
-                <option value="خضروات">خضروات</option>
-                <option value="ورقيات وأعلاف">ورقيات وأعلاف</option>
-                <option value="عنب">عنب</option>
-                <option value="نخل">نخل</option>
-                <option value="تين">تين</option>
-                <option value="خوخ">خوخ</option>
-                <option value="مشمش">مشمش</option>
-                <option value="رمان">رمان</option>
-                <option value="بن">بن</option>
-                <option value="ورد طائفي">ورد طائفي</option>
-                <option value="نباتات ظل">نباتات الظل</option>
-                <option value="زراعة منزلية">زراعة منزلية</option>
-              </select>
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 focus:outline-none focus:border-[#0058E6]"
+                placeholder="مثال: بطاطس، طماطم، برسيم، زراعة منزلية..."
+              />
             </div>
 
             <div className="space-y-1">
-              <label className="block text-xs text-white/70">
+              <label className="block text-xs text-slate-700">
                 ملاحظات إضافية عن حالة الحقل (اختياري)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 text-xs md:text-sm focus:outline-none focus:border-[#4BA3FF]"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs md:text-sm focus:outline-none focus:border-[#0058E6]"
                 placeholder="مثال: التربة ثقيلة، كان فيه ري غزير قبل أسبوع، ظهرت حشرات مؤخراً..."
               />
             </div>
 
-            {/* آخر مرة تم الري */}
-            <div className="space-y-1">
-              <label className="block text-xs text-white/70">
+            {/* آخر مرة تم الري */}            <div className="space-y-1">
+              <label className="block text-xs text-slate-700">
                 متى آخر مرة تم ري هذا الحقل؟
               </label>
               <input
@@ -403,28 +416,28 @@ export default function NewFieldPage() {
                 className="w-full rounded-xl bg-black/40 border border-white/15 px-3 py-2 text-xs md:text-sm focus:outline-none focus:border-[#4BA3FF]"
               />
               <p className="text-[10px] text-white/40">
-                هذه المعلومة لن تعرض للآخرين، لكنها تساعد في فهم حالة التربة
-                واقتراح ري مناسب.
+                يكفي اختيار اليوم التقريبي لآخر ري، وسيتم استخدامه لتقدير
+                احتياج الحقل للري في التحليلات.
               </p>
             </div>
 
             <div className="space-y-1">
-              <label className="block text-xs text-white/70">
-                صور النباتات في هذا الحقل (6 صور على الأقل)
+              <label className="block text-xs text-slate-700">
+                صور النباتات في هذا الحقل (3 صور على الأقل)
               </label>
               <input
                 type="file"
                 accept="image/*"
                 multiple
                 onChange={handleFilesChange}
-                className="w-full rounded-xl bg-black/40 border border-dashed border-white/25 px-3 py-3 text-xs file:mr-3 file:rounded-lg file:border-none file:bg-[#0058E6] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:border-[#4BA3FF]"
+                className="w-full rounded-xl bg-slate-50 border border-dashed border-slate-300 px-3 py-3 text-xs file:mr-3 file:rounded-lg file:border-none file:bg-[#0058E6] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:border-[#0058E6]"
               />
-              <p className="text-[11px] text-white/50 mt-1">
+              <p className="text-[11px] text-slate-600 mt-1">
                 يمكنك التصوير مباشرة من الجوال أو اختيار صور من المعرض. كلما كانت
                 الصور أوضح ومن زوايا مختلفة، كان التحليل أدق.
               </p>
               {files.length > 0 && (
-                <p className="text-[11px] text-emerald-300 mt-1">
+                <p className="text-[11px] text-emerald-700 mt-1">
                   تم اختيار {files.length} صورة.
                 </p>
               )}
@@ -433,34 +446,36 @@ export default function NewFieldPage() {
             <button
               type="submit"
               disabled={saving}
-              className="mt-2 w-full rounded-xl bg-[#0058E6] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="mt-2 w-full rounded-xl bg-[#0058E6] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0058E6]/30 hover:bg-[#1D7AF3] transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {saving ? "جارٍ حفظ الحقل ورفع الصور..." : "حفظ الحقل وتحليل الصور"}
+              {saving
+                ? "جارٍ حفظ الحقل ورفع الصور..."
+                : "حفظ الحقل وتحليل الصور"}
             </button>
           </form>
 
           {aiLoading && (
-            <div className="mt-4 rounded-2xl bg-black/40 border border-white/15 px-4 py-3 text-sm text-white/70">
+            <div className="mt-4 rounded-2xl bg-slate-100 border border-slate-200 px-4 py-3 text-sm text-slate-700">
               يتم الآن تحليل صور النباتات بالذكاء الاصطناعي... ⏳
             </div>
           )}
 
           {aiError && (
-            <div className="mt-4 rounded-2xl bg-red-500/10 border border-red-500/40 px-4 py-3 text-sm text-red-200">
+            <div className="mt-4 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {aiError}
             </div>
           )}
 
           {aiResult && (
             <div className="mt-4 space-y-3">
-              <div className="rounded-2xl bg-emerald-500/5 border border-emerald-500/40 px-4 py-3 text-sm text-emerald-100 whitespace-pre-line">
+              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-900 whitespace-pre-line">
                 <p className="font-semibold mb-2">
                   تقرير المساعد الذكي لهذا الحقل:
                 </p>
                 <p>{aiResult}</p>
               </div>
 
-              <div className="rounded-2xl bg-black/40 border border-white/15 px-4 py-3 text-xs md:text-sm text-white/80 space-y-2">
+              <div className="rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs md:text-sm text-slate-800 space-y-2">
                 <p className="font-semibold">
                   كيف تقيم دقة هذا التقرير من 5؟
                 </p>
@@ -472,7 +487,7 @@ export default function NewFieldPage() {
                         e.target.value ? Number(e.target.value) : (null as any)
                       )
                     }
-                    className="rounded-xl bg-black/40 border border-white/20 px-3 py-1.5 text-xs focus:outline-none focus:border-[#4BA3FF]"
+                    className="rounded-xl bg-slate-50 border border-slate-300 px-3 py-1.5 text-xs focus:outline-none focus:border-[#0058E6]"
                   >
                     <option value="">اختر التقييم</option>
                     <option value="1">1 - ضعيف جداً</option>
@@ -485,14 +500,14 @@ export default function NewFieldPage() {
                   <button
                     type="button"
                     onClick={handleRatingConfirm}
-                    className="rounded-xl bg-[#0058E6] px-4 py-1.5 text-xs font-semibold text-white shadow-md shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition"
+                    className="rounded-xl bg-[#0058E6] px-4 py-1.5 text-xs font-semibold text-white shadow-md shadow-[#0058E6]/30 hover:bg-[#1D7AF3] transition"
                   >
                     تأكيد التقييم وحفظ التقرير
                   </button>
                 </div>
 
                 {ratingMessage && (
-                  <p className="text-[11px] text-white/70 mt-1">
+                  <p className="text-[11px] text-slate-600 mt-1">
                     {ratingMessage}
                   </p>
                 )}

@@ -152,30 +152,28 @@ export default function DashboardPage() {
           setFarms((farmsData || []) as Farm[]);
         }
 
-        // ✅ جلب الحقول لهذا المستخدم (مع last_watering_at)
-        // ✅ بعد ما جبنا farmsData فوق مباشرة
-const farmIds = (farmsData || []).map((f: any) => f.id as string);
+        // ✅ جلب الحقول لهذه المزارع
+        const farmIds = (farmsData || []).map((f: any) => f.id as string);
 
-let fieldsData: any[] | null = [];
-let fieldsError: any = null;
+        let fieldsData: any[] | null = [];
+        let fieldsError: any = null;
 
-if (farmIds.length > 0) {
-  const { data, error } = await supabase
-    .from("fields")
-    .select(
-      "id, farm_id, user_id, name, crop_type, notes, created_at, area, irrigation_method, last_watering_at"
-    )
-    .in("farm_id", farmIds); // 🟢 نجيب كل الحقول التابعة لمزارعك
-  fieldsData = data;
-  fieldsError = error;
-}
-
+        if (farmIds.length > 0) {
+          const { data, error } = await supabase
+            .from("fields")
+            .select(
+              "id, farm_id, user_id, name, crop_type, notes, created_at, area, irrigation_method, last_watering_at"
+            )
+            .in("farm_id", farmIds);
+          fieldsData = data;
+          fieldsError = error;
+        }
 
         if (fieldsError) {
           console.warn("load fields error:", fieldsError);
         }
 
-        // ✅ جلب تقارير المساعد الذكي لكل حقل
+        // ✅ جلب تقارير المساعد الذكي لكل حقل (تحليل الصور)
         const { data: inspectionsData, error: inspectionsError } =
           await supabase
             .from("plant_inspections")
@@ -186,7 +184,7 @@ if (farmIds.length > 0) {
           console.warn("load inspections error:", inspectionsError);
         }
 
-        // نحدد آخر وقت فحص
+        // نحدد آخر وقت فحص على مستوى الحساب
         if (inspectionsData && inspectionsData.length > 0) {
           const latest = inspectionsData.reduce((acc, cur) => {
             if (!acc) return cur;
@@ -302,6 +300,13 @@ if (farmIds.length > 0) {
   const fieldsCount = fields.length;
   const activeConsultationsDemo = 0;
 
+  // 🔢 إحصائيات مرتبطة بتحليل الصور
+  const analyzedFieldsCount = fields.filter((f) => !!f.latest_report).length;
+  const analyzedPercentage =
+    fieldsCount > 0
+      ? Math.round((analyzedFieldsCount / fieldsCount) * 100)
+      : 0;
+
   // 🔔 تجهيز تنبيهات الري: الحقول اللي حالتها "soon" أو "urgent"
   const irrigationAlerts =
     !loadingData && !checkingUser
@@ -321,10 +326,17 @@ if (farmIds.length > 0) {
           )
       : [];
 
+  const urgentCount = irrigationAlerts.filter(
+    (a) => a.status.tone === "urgent"
+  ).length;
+  const soonCount = irrigationAlerts.filter(
+    (a) => a.status.tone === "soon"
+  ).length;
+
   if (checkingUser || loadingData) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-[#050814] via-[#02040b] to-black text-white flex items-center justify-center">
-        <div className="rounded-3xl bg-black/70 border border-white/10 px-6 py-4 text-sm text-white/70">
+      <main className="min-h-screen bg-[#F7FAFB] text-slate-700 flex items-center justify-center">
+        <div className="rounded-2xl bg-white border border-slate-200 px-6 py-4 text-sm text-slate-600 shadow-sm">
           يتم التحقق من حسابك وتحميل بيانات مزارعك...
         </div>
       </main>
@@ -332,22 +344,22 @@ if (farmIds.length > 0) {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#050814] via-[#02040b] to-black text-white">
+    <main className="min-h-screen bg-[#F7FAFB] text-slate-900">
       <div className="mx-auto max-w-6xl px-4 pt-24 pb-16 space-y-10">
         {/* الهيدر العلوي */}
         <section className="flex flex-col gap-4 md:gap-0 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-1">
+            <h1 className="text-2xl md:text-3xl font-bold mb-1 text-slate-900">
               لوحة تحكم المزارع — مسار
             </h1>
-            <p className="text-sm text-white/60 max-w-xl">
-              من هنا تدير مزارعك وحقولك، تتابع التقارير، وتستخدم المساعد الذكي
-              وترتبط مع المستشارين الزراعيين.
+            <p className="text-sm text-slate-600 max-w-xl">
+              من هنا تدير مزارعك وحقولك، تتابع تقارير تحليل الصور، وتنظم مواعيد
+              الري، وترتبط مع المستشارين الزراعيين.
             </p>
             {userName || userEmail ? (
-              <p className="mt-2 text-[11px] text-white/50">
+              <p className="mt-2 text-[11px] text-slate-500">
                 مسجل الدخول كـ{" "}
-                <span className="font-semibold">
+                <span className="font-semibold text-slate-800">
                   {userName || userEmail || ""}
                 </span>
               </p>
@@ -356,98 +368,186 @@ if (farmIds.length > 0) {
 
           <div className="flex flex-col items-stretch sm:items-end gap-3">
             <div className="flex flex-wrap gap-3 text-xs justify-end">
-              <span className="rounded-full bg-[#0058E6]/20 border border-[#0058E6]/40 px-3 py-1 text-[#4BA3FF]">
-                متصل بقاعدة بيانات Supabase
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#0058E6]/10 border border-[#0058E6]/30 px-3 py-1 text-[#0058E6]">
+                <span className="text-[13px]">●</span>
+                <span>متصل بقاعدة بيانات Supabase</span>
               </span>
-              <span className="rounded-full bg-[#FFCC33]/10 border border-[#FFCC33]/30 px-3 py-1 text-[#FFCC33]">
+              <span className="rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-amber-700">
                 بعض الأرقام لا تزال تجريبية
               </span>
             </div>
             <button
               type="button"
               onClick={handleLogout}
-              className="self-end text-xs rounded-xl border border-red-400/60 bg-red-500/10 px-3 py-1.5 text-red-200 hover:bg-red-500/20 transition"
+              className="self-end text-xs rounded-xl border border-red-300 bg-red-50 px-3 py-1.5 text-red-700 hover:bg-red-100 transition"
             >
               تسجيل الخروج من هذا الحساب
             </button>
           </div>
         </section>
 
-        {/* الكروت العلوية */}
+        {/* الكروت العلوية (إحصائيات رئيسية) */}
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="relative overflow-hidden rounded-3xl bg-black/60 border border-white/10 p-4">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#0058E6]/20 via-transparent to-transparent pointer-events-none" />
-            <div className="relative space-y-1">
-              <p className="text-xs text-white/60">عدد المزارع المسجلة</p>
-              <p className="text-2xl font-semibold">{farmCount}</p>
-              <p className="text-[11px] text-white/50">
-                هذا الرقم يعتمد على عدد المزارع الفعلية المخزّنة في قاعدة
-                البيانات.
+          {/* عدد المزارع */}
+          <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#0058E6]/5 via-transparent to-transparent pointer-events-none" />
+            <div className="relative space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-xl bg-[#0058E6]/10 flex items-center justify-center text-[18px] text-[#0058E6]">
+                  🌱
+                </div>
+                <p className="text-xs text-slate-500">عدد المزارع المسجلة</p>
+              </div>
+              <p className="text-2xl font-semibold text-slate-900">
+                {farmCount}
+              </p>
+              <p className="text-[11px] text-slate-500">
+                تمثّل عدد المزارع الفعلية المرتبطة بحسابك داخل المنصة.
               </p>
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl bg-black/60 border border-white/10 p-4">
-            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/15 via-transparent to-transparent pointer-events-none" />
-            <div className="relative space-y-1">
-              <p className="text-xs text-white/60">عدد الحقول</p>
-              <p className="text-2xl font-semibold">{fieldsCount}</p>
-              <p className="text-[11px] text-white/50">
-                عدد الحقول التي تم تسجيلها فعليًا في مزارعك داخل المنصة.
+          {/* عدد الحقول + نسبة التي تم تحليلها بالصور */}
+          <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/5 via-transparent to-transparent pointer-events-none" />
+            <div className="relative space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-[18px] text-emerald-600">
+                    📸
+                  </div>
+                  <p className="text-xs text-slate-500">عدد الحقول</p>
+                </div>
+                {fieldsCount > 0 && (
+                  <span className="text-[11px] rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-700 border border-emerald-200">
+                    {analyzedFieldsCount} تم تحليلها بالصور
+                  </span>
+                )}
+              </div>
+              <p className="text-2xl font-semibold text-slate-900">
+                {fieldsCount}
               </p>
+
+              {fieldsCount > 0 && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>نسبة الحقول التي تم تحليلها</span>
+                    <span className="font-semibold text-emerald-700">
+                      {analyzedPercentage}%
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all"
+                      style={{ width: `${analyzedPercentage}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {fieldsCount === 0 && (
+                <p className="text-[11px] text-slate-500">
+                  أضف أول حقل لك لتبدأ في رفع الصور وتحليلها بالذكاء الاصطناعي.
+                </p>
+              )}
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl bg-black/60 border border-white/10 p-4">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#FFCC33]/20 via-transparent to-transparent pointer-events-none" />
-            <div className="relative space-y-1">
-              <p className="text-xs text-white/60">
-                آخر فحص بالذكاء الاصطناعي
-              </p>
-              <p className="text-2xl font-semibold">
+          {/* آخر فحص بالذكاء الاصطناعي */}
+          <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-tr from-amber-300/10 via-transparent to-transparent pointer-events-none" />
+            <div className="relative space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-xl bg-amber-100 flex items-center justify-center text-[18px] text-amber-600">
+                  🔍
+                </div>
+                <p className="text-xs text-slate-500">
+                  آخر فحص لتحليل الصور
+                </p>
+              </div>
+              <p className="text-sm md:text-base font-semibold text-slate-900">
                 {lastInspectionAt
                   ? new Date(lastInspectionAt).toLocaleString("ar-SA")
                   : farmCount > 0
-                  ? "بانتظار أول فحص"
-                  : "بانتظار أول مزرعة"}
+                  ? "بانتظار أول تحليل صور"
+                  : "بانتظار إضافة أول مزرعة"}
               </p>
-              <p className="text-[11px] text-white/50">
+              <p className="text-[11px] text-slate-500">
                 يتم تحديث هذا الوقت بعد كل تحليل صور ناجح لأحد الحقول.
               </p>
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl bg-black/60 border border-white/10 p-4">
-            <div className="absolute inset-0 bg-gradient-to-tr from-pink-500/15 via-transparent to-transparent pointer-events-none" />
-            <div className="relative space-y-1">
-              <p className="text-xs text-white/60">استشارات زراعية</p>
-              <p className="text-2xl font-semibold">
+          {/* استشارات زراعية (تجريبي) */}
+          <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-tr from-pink-400/10 via-transparent to-transparent pointer-events-none" />
+            <div className="relative space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-xl bg-pink-50 flex items-center justify-center text-[18px] text-pink-500">
+                  🧑‍🌾
+                </div>
+                <p className="text-xs text-slate-500">استشارات زراعية</p>
+              </div>
+              <p className="text-2xl font-semibold text-slate-900">
                 {activeConsultationsDemo}
               </p>
-              <p className="text-[11px] text-white/50">
+              <p className="text-[11px] text-slate-500">
                 هذا الحقل تجريبي حاليًا، ويمكن ربطه لاحقًا بجدول طلبات
-                الاستشارات.
+                الاستشارات عن بعد أو الزيارات الميدانية.
               </p>
             </div>
           </div>
         </section>
 
         {/* 🔔 تنبيهات الري للحقول */}
-        <section className="rounded-3xl bg-black/60 border border-white/10 p-5 md:p-6 space-y-3">
+        <section
+          className={`rounded-2xl border p-5 md:p-6 space-y-3 shadow-sm ${
+            irrigationAlerts.length === 0
+              ? "bg-emerald-50 border-emerald-200"
+              : urgentCount > 0
+              ? "bg-red-50 border-red-200"
+              : "bg-amber-50 border-amber-200"
+          }`}
+        >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm md:text-base font-semibold mb-1">
+              <h2 className="text-sm md:text-base font-semibold mb-1 text-slate-900">
                 تنبيهات الري الحالية
               </h2>
-              <p className="text-[11px] text-white/60">
+              <p className="text-[11px] text-slate-600">
                 تعتمد هذه التنبيهات على تاريخ آخر ري مسجل لكل حقل ونوع المحصول،
-                لتخبرك متى يُفضّل الري أو إذا كنت متأخرًا عن الموعد.
+                لتخبرك متى يُفضّل الري أو إذا كنت متأخرًا عن الموعد. يمكنك تعديل
+                بيانات الري من صفحة تفاصيل الحقل.
               </p>
+            </div>
+
+            <div className="flex flex-col items-end gap-1 text-[11px]">
+              {irrigationAlerts.length === 0 ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-emerald-800 border border-emerald-200">
+                  <span>✅</span>
+                  <span>لا توجد حقول بحاجة إلى ري مستعجل</span>
+                </span>
+              ) : (
+                <>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-slate-800 border border-slate-200">
+                    <span>🔔</span>
+                    <span>
+                      {irrigationAlerts.length} حقل بحاجة إلى متابعة الري
+                    </span>
+                  </span>
+                  <div className="flex gap-2 text-[10px] text-slate-600">
+                    {urgentCount > 0 && (
+                      <span>🔴 حرجة: {urgentCount}</span>
+                    )}
+                    {soonCount > 0 && <span>🟡 قريبة: {soonCount}</span>}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           {irrigationAlerts.length === 0 ? (
-            <p className="text-[11px] text-emerald-300 bg-emerald-500/5 border border-emerald-500/40 rounded-2xl px-3 py-2">
+            <p className="text-[11px] text-emerald-800">
               لا توجد حاليًا أي حقول تحتاج ري مستعجل أو قريب. استمر في تسجيل
               مواعيد الري من صفحة تفاصيل الحقل لتحسين دقة التوصيات.
             </p>
@@ -456,39 +556,48 @@ if (farmIds.length > 0) {
               {irrigationAlerts.map(({ field, farmName, status }) => (
                 <div
                   key={field.id}
-                  className={`rounded-2xl px-4 py-3 border ${
-                    status.tone === "urgent"
-                      ? "bg-red-500/5 border-red-500/50"
-                      : "bg-amber-500/5 border-amber-500/40"
-                  }`}
+                  className={`rounded-2xl px-4 py-3 border bg-white`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-semibold text-slate-900">
                         {field.name || "حقل بدون اسم"}{" "}
-                        <span className="text-white/60 text-[11px]">
+                        <span className="text-slate-500 text-[11px]">
                           — {farmName}
                         </span>
                       </p>
                       {field.crop_type && (
-                        <p className="text-[11px] text-white/60">
+                        <p className="text-[11px] text-slate-500">
                           نوع المحصول: {field.crop_type}
                         </p>
                       )}
                     </div>
 
-                    <Link
-                      href={`/fields/${field.id}`}
-                      className="text-[11px] rounded-xl border border-white/25 bg-white/10 px-2.5 py-1 hover:bg-white/20 transition"
-                    >
-                      عرض تفاصيل الحقل
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-[11px] inline-flex items-center gap-1 rounded-full px-2 py-0.5 border ${
+                          status.tone === "urgent"
+                            ? "bg-red-50 border-red-200 text-red-700"
+                            : "bg-amber-50 border-amber-200 text-amber-700"
+                        }`}
+                      >
+                        {status.tone === "urgent" ? "🔴 مستعجل" : "🟡 قريب"}
+                      </span>
+                      <Link
+                        href={`/fields/${field.id}`}
+                        className="text-[11px] rounded-xl border border-slate-300 bg-white px-2.5 py-1 hover:bg-slate-50 transition"
+                      >
+                        عرض تفاصيل الحقل
+                      </Link>
+                    </div>
                   </div>
 
-                  <p className="text-[12px] md:text-[13px]">{status.label}</p>
+                  <p className="text-[12px] md:text-[13px] text-slate-700">
+                    {status.label}
+                  </p>
 
                   {field.last_watering_at && (
-                    <p className="mt-1 text-[11px] text-white/50">
+                    <p className="mt-1 text-[11px] text-slate-500">
                       آخر ري مسجل:{" "}
                       {new Date(
                         field.last_watering_at
@@ -505,113 +614,114 @@ if (farmIds.length > 0) {
         <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <Link
             href="/farms/new"
-            className="group rounded-3xl bg-black/60 border border-white/10 p-4 hover:border-[#4BA3FF] hover:bg-black/70 transition overflow-hidden"
+            className="group rounded-2xl bg-white border border-slate-200 p-4 hover:border-[#0058E6] hover:bg-slate-50 transition overflow-hidden shadow-sm"
           >
             <div className="flex items-start gap-3 relative z-10">
-              <div className="h-10 w-10 rounded-2xl bg-[#0058E6]/20 flex items-center justify-center text-lg group-hover:scale-110 transition">
+              <div className="h-10 w-10 rounded-2xl bg-[#0058E6]/10 flex items-center justify-center text-lg text-[#0058E6] group-hover:scale-110 transition">
                 ➕
               </div>
               <div>
-                <p className="text-sm font-semibold mb-1">إضافة مزرعة جديدة</p>
-                <p className="text-[11px] text-white/60">
-                  سجّل مزرعتك وحدد موقعها، ثم ابدأ في إضافة الحقول وتصوير
-                  النباتات.
+                <p className="text-sm font-semibold mb-1 text-slate-900">
+                  إضافة مزرعة جديدة
+                </p>
+                <p className="text-[11px] text-slate-600">
+                  سجّل مزرعتك وحدد موقعها، ثم ابدأ في إضافة الحقول ورفع صور
+                  النباتات للتحليل.
                 </p>
               </div>
             </div>
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-40 transition bg-gradient-to-l from-[#0058E6] to-transparent" />
           </Link>
 
           <Link
             href="/assistant"
-            className="group rounded-3xl bg-black/60 border border-white/10 p-4 hover:border-emerald-400 hover:bg-black/70 transition overflow-hidden"
+            className="group rounded-2xl bg-white border border-slate-200 p-4 hover:border-emerald-500 hover:bg-slate-50 transition overflow-hidden shadow-sm"
           >
             <div className="flex items-start gap-3 relative z-10">
-              <div className="h-10 w-10 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-lg group-hover:scale-110 transition">
+              <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-lg group-hover:scale-110 transition text-emerald-600">
                 🤖
               </div>
               <div>
-                <p className="text-sm font-semibold mb-1">المساعد الذكي</p>
-                <p className="text-[11px] text-white/60">
-                  صوّر النباتات من جوالك، ودع النظام يحلل الأمراض والاحتياجات
-                  الغذائية ومواعيد الري المقترحة.
+                <p className="text-sm font-semibold mb-1 text-slate-900">
+                  المساعد الذكي
+                </p>
+                <p className="text-[11px] text-slate-600">
+                  ارفع صور النباتات، ودع النظام يحلل حالة المحصول ويقترح لك
+                  خطوات لتحسين الري والصحة العامة.
                 </p>
               </div>
             </div>
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-35 transition bg-gradient-to-l from-emerald-500 to-transparent" />
           </Link>
 
           <Link
             href="/consultants"
-            className="group rounded-3xl bg-black/60 border border-white/10 p-4 hover:border-[#FFCC33] hover:bg-black/70 transition overflow-hidden"
+            className="group rounded-2xl bg-white border border-slate-200 p-4 hover:border-amber-400 hover:bg-slate-50 transition overflow-hidden shadow-sm"
           >
             <div className="flex items-start gap-3 relative z-10">
-              <div className="h-10 w-10 rounded-2xl bg-[#FFCC33]/15 flex items-center justify-center text-lg group-hover:scale-110 transition">
+              <div className="h-10 w-10 rounded-2xl bg-amber-100 flex items-center justify-center text-lg text-amber-600 group-hover:scale-110 transition">
                 🌿
               </div>
               <div>
-                <p className="text-sm font-semibold mb-1">
+                <p className="text-sm font-semibold mb-1 text-slate-900">
                   ربط مع مستشار زراعي
                 </p>
-                <p className="text-[11px] text-white/60">
+                <p className="text-[11px] text-slate-600">
                   استعرض المستشارين المعتمدين، أسعارهم، ونطاق خدمتهم، واحجز
                   استشارة عن بعد أو زيارة ميدانية.
                 </p>
               </div>
             </div>
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-35 transition bg-gradient-to-l from-[#FFCC33] to-transparent" />
           </Link>
 
           <Link
             href="/map"
-            className="group rounded-3xl bg-black/60 border border-white/10 p-4 hover:border-white/60 hover:bg-black/70 transition overflow-hidden"
+            className="group rounded-2xl bg-white border border-slate-200 p-4 hover:border-slate-400 hover:bg-slate-50 transition overflow-hidden shadow-sm"
           >
             <div className="flex items-start gap-3 relative z-10">
-              <div className="h-10 w-10 rounded-2xl bg-white/10 flex items-center justify-center text-lg group-hover:scale-110 transition">
+              <div className="h-10 w-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg text-slate-700 group-hover:scale-110 transition">
                 🗺️
               </div>
               <div>
-                <p className="text-sm font-semibold mb-1">الخريطة العامة</p>
-                <p className="text-[11px] text-white/60">
-                  استكشف على الخريطة مناطق الاشتراك، أنواع المزروعات، ومصادر
-                  المياه المسجلة في المنصة.
+                <p className="text-sm font-semibold mb-1 text-slate-900">
+                  الخريطة العامة
+                </p>
+                <p className="text-[11px] text-slate-600">
+                  استكشف على الخريطة مناطق الاشتراك، أنواع المزروعات، ونمط
+                  النشاط الزراعي المسجّل عبر المنصة.
                 </p>
               </div>
             </div>
-            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-35 transition bg-gradient-to-l from-white to-transparent" />
           </Link>
         </section>
 
         {/* جدول المزارع + الحقول */}
-        <section className="rounded-3xl bg-black/60 border border-white/10 p-5 md:p-6 space-y-4">
+        <section className="rounded-2xl bg-white border border-slate-200 p-5 md:p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm md:text-base font-semibold mb-1">
+              <h2 className="text-sm md:text-base font-semibold mb-1 text-slate-900">
                 المزارع المسجلة في حسابك
               </h2>
-              <p className="text-[11px] text-white/60">
+              <p className="text-[11px] text-slate-500">
                 البيانات في هذا الجدول قادمة مباشرة من جدول{" "}
                 <span className="font-mono">farms</span> في Supabase، مع
-                إمكانية استعراض الحقول وتقارير المساعد الذكي لكل مزرعة على
-                حدة.
+                إمكانية استعراض الحقول وتقارير تحليل الصور لكل مزرعة على حدة.
               </p>
             </div>
             <Link
               href="/farms/new"
-              className="text-xs rounded-xl border border-white/25 bg-white/5 px-3 py-1.5 hover:bg-white/10 transition"
+              className="text-xs rounded-xl border border-slate-300 bg-white px-3 py-1.5 hover:bg-slate-50 transition"
             >
               + إضافة مزرعة جديدة
             </Link>
           </div>
 
           {dataError && (
-            <p className="text-[11px] text-red-300 bg-red-500/10 border border-red-500/40 rounded-xl px-3 py-2">
+            <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
               {dataError}
             </p>
           )}
 
           {farms.length === 0 && !dataError && (
-            <p className="text-[11px] text-white/60 bg:white/5 border border-white/10 rounded-2xl px-3 py-3">
+            <p className="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3">
               لا توجد مزارع مسجلة حتى الآن. ابدأ بإضافة مزرعة جديدة لتظهر هنا
               في لوحة التحكم.
             </p>
@@ -620,7 +730,7 @@ if (farmIds.length > 0) {
           {farms.length > 0 && (
             <div className="overflow-x-auto text-xs md:text-sm">
               <table className="w-full border-separate border-spacing-y-2">
-                <thead className="text-[11px] md:text-xs text-white/60">
+                <thead className="text-[11px] md:text-xs text-slate-500">
                   <tr>
                     <th className="text-right px-3 py-2">اسم المزرعة</th>
                     <th className="text-right px-3 py-2">الموقع</th>
@@ -637,6 +747,23 @@ if (farmIds.length > 0) {
                     const farmFields = fields.filter(
                       (f) => f.farm_id === farm.id
                     );
+                    const analyzedInFarm = farmFields.filter(
+                      (f) => !!f.latest_report
+                    ).length;
+
+                    const farmStatusLabel =
+                      farmFields.length === 0
+                        ? "بانتظار إضافة حقول"
+                        : analyzedInFarm === 0
+                        ? "بانتظار أول تحليل صور"
+                        : "تحليلات صور مفعّلة";
+
+                    const farmStatusColorClasses =
+                      farmFields.length === 0
+                        ? "bg-slate-50 text-slate-600 border-slate-200"
+                        : analyzedInFarm === 0
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : "bg-emerald-50 text-emerald-700 border-emerald-200";
 
                     return (
                       <tr key={farm.id} className="align-top">
@@ -645,49 +772,56 @@ if (farmIds.length > 0) {
                             href={`/farms/${farm.id}`}
                             className="block group"
                           >
-                            <div className="bg-white/5 rounded-2xl overflow-hidden border border-transparent group-hover:border-[#4BA3FF]/60 group-hover:bg-white/10 transition">
+                            <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 group-hover:border-[#4BA3FF] transition shadow-sm">
                               <div className="grid grid-cols-8">
-                                <div className="px-3 py-2 col-span-2">
-                                  <div className="flex items-center gap-2">
-                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-xl bg-[#0058E6]/20 text-[11px] text-[#4BA3FF] group-hover:scale-110 group-hover:bg-[#0058E6]/30 transition">
-                                      {farmFields.length}
-                                    </span>
-                                    <div className="flex flex-col">
-                                      <span className="font-semibold">
-                                        {farm.name || "مزرعة بدون اسم"}
-                                      </span>
-                                      <span className="text-[10px] text-white/50">
-                                        عدد الحقول المرتبطة:{" "}
+                                <div className="px-3 py-2 col-span-3">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-xl bg-[#0058E6]/10 text-[11px] text-[#0058E6] group-hover:scale-110 group-hover:bg-[#0058E6]/20 transition">
                                         {farmFields.length}
                                       </span>
+                                      <div className="flex flex-col">
+                                        <span className="font-semibold text-slate-900">
+                                          {farm.name || "مزرعة بدون اسم"}
+                                        </span>
+                                        <span className="text-[10px] text-slate-500">
+                                          عدد الحقول المرتبطة:{" "}
+                                          {farmFields.length}
+                                        </span>
+                                      </div>
                                     </div>
+                                    <span
+                                      className={`ml-2 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] ${farmStatusColorClasses}`}
+                                    >
+                                      {farmStatusLabel}
+                                    </span>
                                   </div>
                                 </div>
-                                <div className="px-3 py-2 col-span-2">
+                                <div className="px-3 py-2 col-span-2 text-slate-700">
                                   {farm.location_description ||
                                     "لم يتم تحديد الموقع نصيًا"}
                                 </div>
-                                <div className="px-3 py-2 col-span-1">
+                                <div className="px-3 py-2 col-span-1 text-slate-700">
                                   {farm.area || "غير محددة"}
                                 </div>
-                                <div className="px-3 py-2 col-span-1">
+                                <div className="px-3 py-2 col-span-1 text-slate-700">
                                   {farm.main_crops || "لم تُحدد بعد"}
                                 </div>
-                                <div className="px-3 py-2 col-span-1">
+                                <div className="px-3 py-2 col-span-1 text-slate-700">
                                   {farm.farming_type || "غير محدد"}
                                 </div>
-                                <div className="px-3 py-2 col-span-1">
+                                <div className="px-3 py-2 col-span-1 text-slate-700">
                                   {farm.water_source || "غير محدد"}
                                 </div>
                                 <div className="px-3 py-2 col-span-1 flex items-center justify-between">
-                                  <span>
+                                  <span className="text-slate-700">
                                     {farm.created_at
                                       ? new Date(
                                           farm.created_at
                                         ).toLocaleDateString("ar-SA")
                                       : "—"}
                                   </span>
-                                  <span className="inline-flex items-center gap-1 text-[11px] text-white/60 group-hover:text-[#4BA3FF] transition">
+                                  <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 group-hover:text-[#4BA3FF] transition">
                                     <span>عرض التفاصيل</span>
                                     <span className="translate-x-0 group-hover:translate-x-0.5 transition-transform">
                                       ⟵
@@ -698,9 +832,9 @@ if (farmIds.length > 0) {
 
                               {/* الحقول التابعة لهذه المزرعة (معاينة سريعة) */}
                               {farmFields.length > 0 && (
-                                <div className="border-t border-white/10 px-3 py-3 bg-black/40">
-                                  <p className="text-[11px] text-white/60 mb-2">
-                                    قم بمعاينة سريعة لأحدث تقارير الحقول في هذه
+                                <div className="border-t border-slate-200 px-3 py-3 bg-slate-50">
+                                  <p className="text-[11px] text-slate-500 mb-2">
+                                    معاينة سريعة لأحدث تقارير الحقول في هذه
                                     المزرعة:
                                   </p>
                                   <div className="space-y-2">
@@ -715,27 +849,27 @@ if (farmIds.length > 0) {
                                       return (
                                         <div
                                           key={field.id}
-                                          className="rounded-2xl bg:white/5 border border-white/10 px-3 py-2 text-[11px] md:text-xs bg-white/5"
+                                          className="rounded-2xl border border-slate-200 px-3 py-2 text-[11px] md:text-xs bg-white"
                                         >
                                           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
                                             <div className="space-y-0.5">
-                                              <p className="font-semibold text-xs">
+                                              <p className="font-semibold text-xs text-slate-900">
                                                 {field.name || "حقل بدون اسم"}
                                               </p>
                                               {field.crop_type && (
-                                                <p className="text-white/65">
+                                                <p className="text-slate-600">
                                                   المحصول: {field.crop_type}
                                                 </p>
                                               )}
                                               {field.area && (
-                                                <p className="text-white/60">
+                                                <p className="text-slate-600">
                                                   المساحة: {field.area}
                                                 </p>
                                               )}
                                             </div>
                                             {typeof field.latest_rating ===
                                               "number" && (
-                                              <span className="self-start md:self-center inline-flex items-center rounded-full bg-emerald-500/10 border border-emerald-400/60 px-2.5 py-0.5 text-[10px] text-emerald-200">
+                                              <span className="self-start md:self-center inline-flex items-center rounded-full bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 text-[10px] text-emerald-700">
                                                 تقييم المساعد:{" "}
                                                 {field.latest_rating} / 5
                                               </span>
@@ -743,7 +877,7 @@ if (farmIds.length > 0) {
                                           </div>
 
                                           {shortReport && (
-                                            <p className="mt-2 text-[11px] text-white/70">
+                                            <p className="mt-2 text-[11px] text-slate-600">
                                               {shortReport}
                                             </p>
                                           )}
@@ -752,7 +886,7 @@ if (farmIds.length > 0) {
                                     })}
                                   </div>
                                   {farmFields.length > 2 && (
-                                    <p className="mt-2 text-[10px] text-white/50">
+                                    <p className="mt-2 text-[10px] text-slate-500">
                                       يوجد حقول إضافية وتفاصيل أكثر داخل صفحة
                                       المزرعة.
                                     </p>

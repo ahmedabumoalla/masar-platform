@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
-
-
 
 type Farm = {
   id: string;
@@ -36,11 +35,18 @@ type FieldWithReport = Field & {
   latest_rating: number | null;
 };
 
+type FarmImage = {
+  id: string;
+  farm_id: string;
+  user_id: string | null;
+  image_url: string;
+  created_at: string | null;
+};
+
 export default function FarmDetailsPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const farmId = (params?.id || "") as string;
-
 
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -48,6 +54,10 @@ export default function FarmDetailsPage() {
   const [fields, setFields] = useState<FieldWithReport[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // 🔹 صور المزرعة (اللي تترفع وقت إضافة المزرعة)
+  const [farmImages, setFarmImages] = useState<FarmImage[]>([]);
+  const [loadingImages, setLoadingImages] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -71,7 +81,7 @@ export default function FarmDetailsPage() {
 
         setCheckingAuth(false);
 
-        // 🧊 جلب بيانات المزرعة (بدون شرط user_id)
+        // 🧊 جلب بيانات المزرعة
         const { data: farmData, error: farmError } = await supabase
           .from("farms")
           .select("*")
@@ -157,11 +167,29 @@ export default function FarmDetailsPage() {
         );
 
         setFields(mergedFields);
+
+        // 🖼️ جلب صور المزرعة (مستوى المزرعة، مو الحقول)
+        setLoadingImages(true);
+        const { data: farmImagesData, error: farmImagesError } = await supabase
+          .from("farm_images")
+          .select("id, farm_id, user_id, image_url, created_at")
+          .eq("farm_id", farmId)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (farmImagesError) {
+          console.error("farm_images fetch error:", farmImagesError);
+        } else {
+          setFarmImages((farmImagesData || []) as FarmImage[]);
+        }
+
         setLoading(false);
+        setLoadingImages(false);
       } catch (err: any) {
         console.error(err);
         setError("حدث خطأ غير متوقع أثناء تحميل بيانات المزرعة.");
         setLoading(false);
+        setLoadingImages(false);
       }
     };
 
@@ -198,8 +226,8 @@ export default function FarmDetailsPage() {
 
   if (checkingAuth || loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white flex items-center justify-center">
-        <div className="rounded-3xl bg-black/70 border border-white/10 px-6 py-4 text-sm text-white/70">
+      <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
+        <div className="rounded-3xl bg-white border border-slate-200 px-6 py-4 text-sm text-slate-600 shadow-sm">
           يتم تحميل بيانات المزرعة والحقول المرتبطة بها...
         </div>
       </main>
@@ -208,8 +236,8 @@ export default function FarmDetailsPage() {
 
   if (!farm) {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white flex items-center justify-center">
-        <div className="rounded-3xl bg-black/70 border border-white/10 px-6 py-4 text-sm text-red-200">
+      <main className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">
+        <div className="rounded-3xl bg-white border border-red-200 px-6 py-4 text-sm text-red-700 shadow-sm">
           تعذر إيجاد هذه المزرعة. تأكد من صحة الرابط أو عد إلى لوحة التحكم.
         </div>
       </main>
@@ -217,21 +245,22 @@ export default function FarmDetailsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#020617] via-[#020617] to-black text-white">
+    <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-6xl px-4 pt-24 pb-16 space-y-8">
         {/* 🔙 شريط أعلى بسيط */}
         <div className="flex items-center justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-[11px] text-white/50">تفاصيل المزرعة</p>
-            <h1 className="text-2xl md:text-3xl font-bold">
+            <p className="text-[11px] text-slate-500">تفاصيل المزرعة</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
               {farm.name || "مزرعة بدون اسم"}
             </h1>
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs">
+            {/* ⚠️ لم ألمس أمر الزر، فقط ألوان الخلفية متوافقة مع الهوية */}
             <Link
               href="/dashboard"
-              className="rounded-xl border border-white/25 bg-white/5 px-3 py-1.5 hover:bg-white/10 transition"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-slate-800 hover:bg-slate-50 transition"
             >
               ⬅ العودة للوحة التحكم
             </Link>
@@ -239,72 +268,76 @@ export default function FarmDetailsPage() {
         </div>
 
         {error && (
-          <div className="rounded-2xl bg-red-500/10 border border-red-500/40 px-4 py-3 text-sm text-red-200">
+          <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        {/* 🧱 بطاقة بيانات المزرعة */}
+        {/* 🧱 بطاقة بيانات المزرعة + موقعها */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 rounded-3xl bg-black/70 border border-white/10 p-5 md:p-6 space-y-4">
-            <h2 className="text-sm md:text-base font-semibold mb-1">
+          {/* نظرة عامة */}
+          <div className="lg:col-span-2 rounded-3xl bg-white border border-slate-200 p-5 md:p-6 space-y-4 shadow-sm">
+            <h2 className="text-sm md:text-base font-semibold mb-1 text-slate-900">
               نظرة عامة على المزرعة
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs md:text-sm">
               <div className="space-y-1">
-                <p className="text-white/60 text-[11px]">اسم المزرعة</p>
-                <p className="font-medium">
+                <p className="text-slate-500 text-[11px]">اسم المزرعة</p>
+                <p className="font-medium text-slate-900">
                   {farm.name || "لم يتم تحديد اسم للمزرعة"}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-white/60 text-[11px]">المساحة التقديرية</p>
-                <p className="font-medium">
+                <p className="text-slate-500 text-[11px]">المساحة التقديرية</p>
+                <p className="font-medium text-slate-900">
                   {farm.area || "غير محددة"}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-white/60 text-[11px]">المحاصيل الرئيسية</p>
-                <p className="font-medium">
+                <p className="text-slate-500 text-[11px]">المحاصيل الرئيسية</p>
+                <p className="font-medium text-slate-900">
                   {farm.main_crops || "لم تُحدد بعد"}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-white/60 text-[11px]">نوع الزراعة</p>
-                <p className="font-medium">
-                  {farm.farming_type || "غير محدد (مفتوحة / محمية / زراعة منزلية)"}
+                <p className="text-slate-500 text-[11px]">نوع الزراعة</p>
+                <p className="font-medium text-slate-900">
+                  {farm.farming_type ||
+                    "غير محدد (مفتوحة / محمية / زراعة منزلية)"}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-white/60 text-[11px]">مصدر المياه</p>
-                <p className="font-medium">
+                <p className="text-slate-500 text-[11px]">مصدر المياه</p>
+                <p className="font-medium text-slate-900">
                   {farm.water_source || "غير محدد (بئر / شبكة / تحلية ...)"}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-white/60 text-[11px]">وصف الموقع</p>
-                <p className="font-medium">
-                  {farm.location_description || "لم تتم إضافة وصف نصي للموقع بعد."}
+                <p className="text-slate-500 text-[11px]">وصف الموقع</p>
+                <p className="font-medium text-slate-900">
+                  {farm.location_description ||
+                    "لم تتم إضافة وصف نصي للموقع بعد."}
                 </p>
               </div>
             </div>
 
             {farm.created_at && (
-              <p className="mt-2 text-[11px] text-white/50">
+              <p className="mt-2 text-[11px] text-slate-500">
                 تاريخ إضافة المزرعة إلى المنصة:{" "}
                 {new Date(farm.created_at).toLocaleDateString("ar-SA")}
               </p>
             )}
 
             <div className="mt-4 flex flex-wrap gap-3 text-xs">
+              {/* ✏️ تعديل بيانات المزرعة – لم ألمس أمر الزر */}
               <Link
                 href={`/farms/${farmId}/edit`}
-                className="rounded-xl border border-white/25 bg-white/5 px-3 py-1.5 hover:bg-white/10 transition"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-slate-800 hover:bg-slate-50 transition"
               >
                 ✏️ تعديل بيانات المزرعة
               </Link>
 
-              {/* إضافة حقل جديد مربوط بـ farmId في الـ URL */}
+              {/* ➕ إضافة حقل جديد – نفس href بالضبط */}
               <Link
                 href={`/farms/${farmId}/fields/new`}
                 className="rounded-xl bg-[#0058E6] px-3 py-1.5 font-semibold text-white shadow-md shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition"
@@ -312,58 +345,63 @@ export default function FarmDetailsPage() {
                 ➕ إضافة حقل جديد لهذه المزرعة
               </Link>
 
-              {/* زر حذف المزرعة */}
+              {/* 🗑️ حذف المزرعة – نفس onClick */}
               <button
                 type="button"
                 onClick={handleDeleteFarm}
                 disabled={deleteLoading}
-                className="rounded-xl border border-red-400/60 bg-red-500/10 px-3 py-1.5 text-red-200 hover:bg-red-500/20 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-red-700 hover:bg-red-100 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {deleteLoading ? "جاري حذف المزرعة..." : "🗑️ حذف هذه المزرعة"}
+                {deleteLoading
+                  ? "جاري حذف المزرعة..."
+                  : "🗑️ حذف هذه المزرعة"}
               </button>
             </div>
           </div>
 
           {/* 📍 معلومات الموقع الجغرافي */}
-          <div className="rounded-3xl bg-black/70 border border-white/10 p-5 space-y-3 text-xs">
-            <h2 className="text-sm font-semibold mb-1">موقع المزرعة</h2>
-            <p className="text-white/60">
+          <div className="rounded-3xl bg-white border border-slate-200 p-5 space-y-3 text-xs shadow-sm">
+            <h2 className="text-sm font-semibold mb-1 text-slate-900">
+              موقع المزرعة
+            </h2>
+            <p className="text-slate-600">
               يتم استخدام هذه الإحداثيات في الخريطة العامة لإظهار الأنماط
               الزراعية ومصادر المياه بشكل إحصائي، دون الكشف عن موقع البئر أو
               التفاصيل الحساسة.
             </p>
             <div className="mt-2 space-y-1">
-              <p className="text-white/60 text-[11px]">خط العرض</p>
-              <p className="font-mono text-[12px]">
+              <p className="text-slate-500 text-[11px]">خط العرض</p>
+              <p className="font-mono text-[12px] text-slate-900">
                 {farm.location_lat ?? "غير مسجل"}
               </p>
-              <p className="text-white/60 text-[11px]">خط الطول</p>
-              <p className="font-mono text-[12px]">
+              <p className="text-slate-500 text-[11px]">خط الطول</p>
+              <p className="font-mono text-[12px] text-slate-900">
                 {farm.location_lng ?? "غير مسجل"}
               </p>
             </div>
             <Link
               href="/map"
-              className="inline-flex mt-3 text-[11px] rounded-xl border border-white/25 bg-white/5 px-3 py-1.5 hover:bg-white/10 transition"
+              className="inline-flex mt-3 text-[11px] rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-slate-800 hover:bg-slate-50 transition"
             >
               🗺️ عرض في الخريطة العامة
             </Link>
           </div>
         </section>
 
-        {/* 🌾 جدول الحقول التابعة للمزرعة + تقارير الذكاء الاصطناعي */}
-        <section className="rounded-3xl bg-black/70 border border-white/10 p-5 md:p-6 space-y-4">
+        {/* 🌾 جدول الحقول + تقارير الذكاء الاصطناعي */}
+        <section className="rounded-3xl bg-white border border-slate-200 p-5 md:p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm md:text-base font-semibold mb-1">
+              <h2 className="text-sm md:text-base font-semibold mb-1 text-slate-900">
                 الحقول المسجلة في هذه المزرعة
               </h2>
-              <p className="text-[11px] text-white/60">
+              <p className="text-[11px] text-slate-600">
                 يمكنك إضافة أكثر من حقل لكل مزرعة، وتصوير النباتات في كل حقل
                 ليقوم المساعد الذكي بتحليلها واقتراح جدول ري وعناية.
               </p>
             </div>
 
+            {/* نفس رابط إضافة الحقل */}
             <Link
               href={`/farms/${farmId}/fields/new`}
               className="text-xs rounded-xl bg-[#0058E6] px-3 py-1.5 font-semibold text-white shadow-md shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition"
@@ -373,7 +411,7 @@ export default function FarmDetailsPage() {
           </div>
 
           {fields.length === 0 && (
-            <p className="mt-2 text-[11px] text-white/60 bg-white/5 border border-white/10 rounded-2xl px-3 py-3">
+            <p className="mt-2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3">
               لا توجد حقول مسجلة حتى الآن لهذه المزرعة. ابدأ بإضافة حقل جديد
               وتسجيل صور النباتات ليتم تحليلها.
             </p>
@@ -383,7 +421,7 @@ export default function FarmDetailsPage() {
             <>
               <div className="overflow-x-auto text-xs md:text-sm">
                 <table className="w-full border-separate border-spacing-y-2">
-                  <thead className="text-[11px] md:text-xs text-white/60">
+                  <thead className="text-[11px] md:text-xs text-slate-500">
                     <tr>
                       <th className="text-right px-3 py-2">اسم الحقل</th>
                       <th className="text-right px-3 py-2">نوع المحصول</th>
@@ -394,17 +432,17 @@ export default function FarmDetailsPage() {
                   </thead>
                   <tbody>
                     {fields.map((field) => (
-                      <tr key={field.id} className="bg-white/5">
-                        <td className="px-3 py-2 rounded-r-2xl">
+                      <tr key={field.id} className="bg-slate-50">
+                        <td className="px-3 py-2 rounded-r-2xl text-slate-900">
                           {field.name || "حقل بدون اسم"}
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 text-slate-900">
                           {field.crop_type || "غير محدد"}
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 text-slate-900">
                           {field.notes || "لا توجد ملاحظات مسجلة"}
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2 text-slate-900">
                           {field.created_at
                             ? new Date(field.created_at).toLocaleDateString(
                                 "ar-SA"
@@ -413,15 +451,16 @@ export default function FarmDetailsPage() {
                         </td>
                         <td className="px-3 py-2 rounded-l-2xl">
                           <div className="flex flex-wrap gap-2 justify-end">
+                            {/* نفس روابط عرض التفاصيل وتعديل */}
                             <Link
                               href={`/fields/${field.id}`}
-                              className="text-[11px] rounded-lg border border-white/25 bg-white/10 px-2.5 py-1 hover:bg-white/20 transition"
+                              className="text-[11px] rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-800 hover:bg-slate-50 transition"
                             >
                               عرض التفاصيل
                             </Link>
                             <Link
                               href={`/fields/${field.id}/edit`}
-                              className="text-[11px] rounded-lg border border-white/25 bg-white/10 px-2.5 py-1 hover:bg-white/20 transition"
+                              className="text-[11px] rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-800 hover:bg-slate-50 transition"
                             >
                               تعديل
                             </Link>
@@ -436,10 +475,10 @@ export default function FarmDetailsPage() {
               {/* 🤖 تقارير المساعد الذكي وجداول الري لكل حقل */}
               {fields.some((f) => f.latest_report) && (
                 <div className="mt-6 space-y-3">
-                  <h3 className="text-sm font-semibold">
+                  <h3 className="text-sm font-semibold text-slate-900">
                     تقارير المساعد الذكي وجداول الري المقترحة
                   </h3>
-                  <p className="text-[11px] text-white/60">
+                  <p className="text-[11px] text-slate-600">
                     هذه التقارير ناتجة عن تحليل الصور لكل حقل باستخدام الذكاء
                     الاصطناعي، وتشمل تشخيص حالة النباتات، وجداول ري وتسميد
                     مقترحة بناءً على الواقع الفعلي في الصور.
@@ -450,15 +489,16 @@ export default function FarmDetailsPage() {
                       field.latest_report && (
                         <div
                           key={field.id}
-                          className="rounded-2xl bg-emerald-500/5 border border-emerald-500/40 px-4 py-3 text-xs md:text-sm whitespace-pre-line"
+                          className="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-xs md:text-sm whitespace-pre-line text-emerald-900"
                         >
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <p className="font-semibold">
                               {field.name || "حقل بدون اسم"}
                             </p>
                             {typeof field.latest_rating === "number" && (
-                              <span className="inline-flex items-center rounded-full bg-emerald-500/10 border border-emerald-400/60 px-3 py-0.5 text-[11px] text-emerald-200">
-                                تقييم المزارع لدقة التقرير: {field.latest_rating} / 5
+                              <span className="inline-flex items-center rounded-full bg-emerald-100 border border-emerald-200 px-3 py-0.5 text-[11px] text-emerald-800">
+                                تقييم المزارع لدقة التقرير:{" "}
+                                {field.latest_rating} / 5
                               </span>
                             )}
                           </div>
@@ -469,6 +509,52 @@ export default function FarmDetailsPage() {
                 </div>
               )}
             </>
+          )}
+        </section>
+
+        {/* 🖼️ صور النباتات على مستوى المزرعة */}
+        <section className="rounded-3xl bg-white border border-slate-200 p-5 md:p-6 space-y-4 shadow-sm">
+          <div>
+            <h2 className="text-sm md:text-base font-semibold mb-1 text-slate-900">
+              صور النباتات لهذه المزرعة
+            </h2>
+            <p className="text-[11px] text-slate-600">
+              هذه الصور تم رفعها عند إضافة المزرعة عندما اخترت{" "}
+              <span className="font-semibold">
+                حفظ المزرعة ثم إضافة الحقول لاحقًا
+              </span>
+              . يتم استخدامها لتحليل حالة المزرعة بشكل عام.
+            </p>
+          </div>
+
+          {loadingImages && (
+            <p className="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2">
+              جاري تحميل صور المزرعة...
+            </p>
+          )}
+
+          {!loadingImages && farmImages.length === 0 && (
+            <p className="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3">
+              لا توجد صور محفوظة على مستوى المزرعة حتى الآن.
+            </p>
+          )}
+
+          {!loadingImages && farmImages.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {farmImages.map((img) => (
+                <div
+                  key={img.id}
+                  className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-slate-100"
+                >
+                  <Image
+                    src={img.image_url}
+                    alt="صورة نبات من هذه المزرعة"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </section>
       </div>

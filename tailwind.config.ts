@@ -1,13 +1,18 @@
-// tailwind.config.ts
+// مثال: tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        brandBlue: "#0058E6",
+        brandBlueLight: "#4BA3FF",
+        brandGreen: "#3B8C4B",
+        surface: "#FFFFFF",
+        background: "#F7FAFB",
+      },
+    },
   },
   plugins: [],
 };

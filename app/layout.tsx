@@ -17,9 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
-      <body className="min-h-screen bg-gradient-to-b from-[#02040b] via-[#020617] to-black text-white antialiased">
+      {/* خلفية فاتحة مريحة + نص غامق */}
+      <body className="min-h-screen bg-[#F7FAFB] text-slate-900 antialiased">
         {/* شريط علوي بسيط */}
-        <header className="border-b border-white/10 bg-black/40 backdrop-blur-sm">
+        <header className="border-b border-slate-200 bg-white/90 backdrop-blur-sm">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 gap-4">
             <div className="flex items-center gap-3">
               <div className="relative h-9 w-9">
@@ -31,29 +32,29 @@ export default function RootLayout({
                 />
               </div>
               <div className="leading-tight">
-                <p className="text-sm font-semibold">مسار</p>
-                <p className="text-[11px] text-white/60">
+                <p className="text-sm font-semibold text-slate-900">مسار</p>
+                <p className="text-[11px] text-slate-600">
                   شريكك الذكي لرفع كفاءة الري وتقليل الهدر المائي
                 </p>
               </div>
             </div>
 
-            <nav className="hidden md:flex items-center gap-4 text-xs text-white/70">
-              <a href="/" className="hover:text-white transition">
+            <nav className="hidden md:flex items-center gap-4 text-xs text-slate-600">
+              <a href="/" className="hover:text-slate-900 transition">
                 الرئيسية
               </a>
-              <a href="#about" className="hover:text-white transition">
+              <a href="#about" className="hover:text-slate-900 transition">
                 عن مسار
               </a>
-              <a href="#services" className="hover:text-white transition">
+              <a href="#services" className="hover:text-slate-900 transition">
                 الخدمات
               </a>
-              <a href="#contact" className="hover:text-white transition">
+              <a href="#contact" className="hover:text-slate-900 transition">
                 تواصل معنا
               </a>
             </nav>
 
-            {/* ✅ هنا من يحكم: مسجّل دخول ولا لا */}
+            {/* يعتمد على حالة المستخدم (مسجّل/غير مسجّل) */}
             <MainHeaderActions />
           </div>
         </header>

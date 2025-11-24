@@ -1,12 +1,14 @@
+// components/main-header-actions.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
+type UserState = "loading" | "guest" | "auth";
+
 export default function MainHeaderActions() {
-  const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [state, setState] = useState<UserState>("loading");
 
   useEffect(() => {
     const checkUser = async () => {
@@ -14,64 +16,56 @@ export default function MainHeaderActions() {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-
-        setIsLoggedIn(!!user);
+        setState(user ? "auth" : "guest");
       } catch (err) {
         console.error("header getUser error:", err);
-        setIsLoggedIn(false);
-      } finally {
-        setLoading(false);
+        setState("guest");
       }
     };
 
     checkUser();
   }, []);
 
-  if (loading) {
-    // بس مساحة فاضية عشان ما يطقّز الهيدر
+  // نخلي فيه ارتفاع بسيط عشان ما يتحرك الهيدر وقت التحميل
+  if (state === "loading") {
     return <div className="h-8" />;
   }
 
-  // ✅ مستخدم مسجّل دخول
-  if (isLoggedIn) {
+  // لو المستخدم مسجل دخول → نعرض رابط لوحة التحكم فقط
+  if (state === "auth") {
     return (
-      <div className="flex items-center gap-2 text-xs">
-        <Link
-          href="/dashboard"
-          className="rounded-xl bg-[#0058E6] px-3 py-1.5 font-semibold text-white shadow-lg shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition"
-        >
-          لوحة التحكم
-        </Link>
-
-        {/* نترك خيار المستشار موجود دائمًا */}
-        <Link
-          href="/expert/apply"
-          className="hidden sm:inline-flex rounded-xl bg-[#FFCC33] px-3 py-1.5 text-black font-semibold hover:bg-[#FFD84F] transition"
-        >
-          قدّم كمستشار زراعي
-        </Link>
-      </div>
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center rounded-full bg-[#0058E6] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#1D7AF3] transition"
+      >
+        لوحة التحكم
+      </Link>
     );
   }
 
-  // ❌ مو مسجّل دخول
+  // 🟢 حالة الزائر (ما هو مسجل دخول)
   return (
     <div className="flex items-center gap-2 text-xs">
+      {/* رابط الدخول */}
       <Link
         href="/auth/login"
-        className="rounded-xl border border-white/25 bg-white/5 px-3 py-1.5 hover:bg-white/10 transition"
+        className="text-slate-700 hover:text-slate-900 transition"
       >
         دخول
       </Link>
+
+      {/* زر تسجيل حساب جديد – هنا المشكلة كانت، تأكدنا إن لون النص واضح */}
       <Link
         href="/auth/register"
-        className="rounded-xl border border-emerald-400/60 bg-emerald-500/10 px-3 py-1.5 text-emerald-100 hover:bg-emerald-500/20 transition"
+        className="inline-flex items-center rounded-full border border-emerald-300 bg-emerald-50/60 px-3 py-1.5 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 transition"
       >
-        تسجيل جديد
+        تسجيل حساب جديد
       </Link>
+
+      {/* زر قدّم كمستشار زراعي – نفس اللي في الصورة */}
       <Link
-        href="/expert/apply"
-        className="hidden sm:inline-flex rounded-xl bg-[#FFCC33] px-3 py-1.5 text-black font-semibold hover:bg-[#FFD84F] transition"
+        href="/consultants/apply"
+        className="inline-flex items-center rounded-full bg-[#F9C74F] px-3.5 py-1.5 text-[11px] font-semibold text-slate-900 shadow-sm hover:bg-[#F7B935] transition"
       >
         قدّم كمستشار زراعي
       </Link>
