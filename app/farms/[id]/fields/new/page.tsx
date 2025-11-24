@@ -10,7 +10,8 @@ export default function NewFieldPage() {
   const params = useParams<{ id?: string; farmId?: string }>();
 
   const farmIdFromRoute = (params?.farmId as string) || (params?.id as string);
-  const farmIdFromQuery = searchParams.get("farmId");
+  const farmIdFromQuery = searchParams?.get("farmId") ?? null;
+
   const farmId = farmIdFromRoute || farmIdFromQuery || null;
 
   const [farmName, setFarmName] = useState<string | null>(null);
