@@ -254,7 +254,10 @@ export default function HomePage() {
               />
             </div>
 
-           لكل قطرة ماء… مسار 
+  <p className="mt-2 text-base md:text-lg font-extrabold text-center">
+    <span className="text-emerald-700">لكل قطرة ماء…</span>{" "}
+    <span className="text-[#0058E6]">مسار</span>
+  </p>
 
 
 
