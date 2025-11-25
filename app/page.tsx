@@ -254,7 +254,13 @@ export default function HomePage() {
                 />
               </div>
 
-           لكل قطرة ماء… مسار 
+<div className="mt-2 flex justify-center text-center select-none">
+  <p className="text-2xl md:text-3xl font-extrabold tracking-tight whitespace-nowrap flex flex-row-reverse gap-2">
+    <span className="text-[#0058E6]">مسار</span>
+    <span className="text-slate-900">…</span>
+    <span className="text-emerald-700">لكل قطرة ماء</span>
+  </p>
+</div>
 
 
 
