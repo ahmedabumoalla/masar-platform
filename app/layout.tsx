@@ -3,6 +3,13 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Image from "next/image";
 import MainHeaderActions from "@/components/main-header-actions";
+import { Cairo } from 'next/font/google'
+
+const cairo = Cairo({
+  subsets: ['arabic'],
+  weight: ['400', '700', '900'],
+})
+
 
 export const metadata: Metadata = {
   title: "مسار | منصة الري الذكي",
@@ -18,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       {/* خلفية فاتحة مريحة + نص غامق */}
-      <body className="min-h-screen bg-[#F7FAFB] text-slate-900 antialiased">
+      <body className={`${cairo.className} bg-[#F7FAFB]`}>
         {/* شريط علوي بسيط */}
         <header className="border-b border-slate-200 bg-white/90 backdrop-blur-sm">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 gap-4">

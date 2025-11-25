@@ -242,31 +242,28 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* العمود الأيمن – الهوية والنص الرئيسي مع لوجو في المنتصف ومتحرك */}
-        <section className="order-1 w-full space-y-6 md:order-2 md:w-1/2">
-          <div className="flex flex-col items-center gap-4 md:items-center">
-            <div className="relative h-32 w-32 md:h-40 md:w-40 ">
-              <Image
-                src="/assets/masar-logo.png"
-                alt="Masar logo"
-                fill
-                className="object-contain drop-shadow-[0_0_22px_rgba(0,88,230,0.35)]"
-              />
+          {/* العمود الأيمن – الهوية والنص الرئيسي مع لوجو في المنتصف ومتحرك */}
+          <section className="order-1 w-full space-y-6 md:order-2 md:w-1/2">
+            <div className="flex flex-col items-center gap-4 md:items-center">
+              <div className="relative h-32 w-32 md:h-40 md:w-40 ">
+                <Image
+                  src="/assets/masar-logo.png"
+                  alt="Masar logo"
+                  fill
+                  className="object-contain drop-shadow-[0_0_22px_rgba(0,88,230,0.35)]"
+                />
+              </div>
+
+           لكل قطرة ماء… مسار 
+
+
+
+
             </div>
 
-  <p className="mt-2 text-base md:text-lg font-extrabold text-center">
-    <span className="text-emerald-700">لكل قطرة ماء…</span>{" "}
-    <span className="text-[#0058E6]">مسار</span>
-  </p>
-
-
-
-
-          </div>
-
-          <div className="space-y-3 text-center md:text-center">
-            <h2 className="text-2xl md:text-3xl font-bold leading-snug text-slate-900">
-              التقط صورة لحقلِك،
+            <div className="space-y-3 text-center md:text-center">
+              <h2 className="text-2xl md:text-3xl font-bold leading-snug text-slate-900">
+                التقط صورة لحقلِك،
               <br className="hidden md:block" />
               ودع مسار يحوّلها لقرارات ريّ أوضح.
             </h2>
