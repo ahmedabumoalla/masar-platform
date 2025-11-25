@@ -254,16 +254,11 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="space-y-2 text-center">
-              <p className="text-sm md:text-base text-emerald-700">
-                <span className="font-light">لكل قطرة ماء</span>
-                <span className="mx-1">…</span>
-                <span className="font-semibold text-slate-900">مسار</span>
-              </p>
-              <p className="text-[12px] md:text-sm text-slate-600">
-                منصة ذكية لتحليل صور المزارع وتنظيم الري
-              </p>
-            </div>
+           لكل قطرة ماء… مسار 🔥
+
+
+
+
           </div>
 
           <div className="space-y-3 text-center md:text-center">
