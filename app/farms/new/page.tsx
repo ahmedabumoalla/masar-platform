@@ -206,6 +206,7 @@ export default function NewFarmPage() {
     }
   };
 
+  // ✅ تم تعديل الدالة بالكامل هنا لحفظ تقرير AI في farm_level_report
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -263,6 +264,22 @@ export default function NewFarmPage() {
       }
 
       const newFarmId = data.id as string;
+
+      // ✅ لو عندنا تقرير ذكاء اصطناعي للمزرعة (من قسم تحليل الصور)
+      // نخزّنه في حقل farm_level_report في جدول farms
+      if (startMode === "later" && aiSummary && aiSummary.trim().length > 0) {
+        const { error: updateReportError } = await supabase
+          .from("farms")
+          .update({ farm_level_report: aiSummary.trim() })
+          .eq("id", newFarmId);
+
+        if (updateReportError) {
+          console.error(
+            "❌ update farm_level_report error:",
+            updateReportError
+          );
+        }
+      }
 
       // 🖼️ حفظ صور هذه المزرعة في جدول farm_images + التخزين
       if (startMode === "later" && images.length > 0) {

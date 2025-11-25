@@ -18,6 +18,8 @@ type Farm = {
   location_lat: number | null;
   location_lng: number | null;
   created_at: string | null;
+  // ✅ حقل ملخص تحليل المزرعة (اختياري)
+  farm_level_report?: string | null;
 };
 
 type Field = {
@@ -81,7 +83,7 @@ export default function FarmDetailsPage() {
 
         setCheckingAuth(false);
 
-        // 🧊 جلب بيانات المزرعة
+        // 🧊 جلب بيانات المزرعة (بما فيها farm_level_report لو موجود)
         const { data: farmData, error: farmError } = await supabase
           .from("farms")
           .select("*")
@@ -168,7 +170,7 @@ export default function FarmDetailsPage() {
 
         setFields(mergedFields);
 
-        // 🖼️ جلب صور المزرعة (مستوى المزرعة، مو الحقول)
+        // 🖼️ جلب صور المزرعة (مستوى المزرعة)
         setLoadingImages(true);
         const { data: farmImagesData, error: farmImagesError } = await supabase
           .from("farm_images")
@@ -257,7 +259,6 @@ export default function FarmDetailsPage() {
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs">
-            {/* ⚠️ لم ألمس أمر الزر، فقط ألوان الخلفية متوافقة مع الهوية */}
             <Link
               href="/dashboard"
               className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-slate-800 hover:bg-slate-50 transition"
@@ -329,7 +330,6 @@ export default function FarmDetailsPage() {
             )}
 
             <div className="mt-4 flex flex-wrap gap-3 text-xs">
-              {/* ✏️ تعديل بيانات المزرعة – لم ألمس أمر الزر */}
               <Link
                 href={`/farms/${farmId}/edit`}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-slate-800 hover:bg-slate-50 transition"
@@ -337,7 +337,6 @@ export default function FarmDetailsPage() {
                 ✏️ تعديل بيانات المزرعة
               </Link>
 
-              {/* ➕ إضافة حقل جديد – نفس href بالضبط */}
               <Link
                 href={`/farms/${farmId}/fields/new`}
                 className="rounded-xl bg-[#0058E6] px-3 py-1.5 font-semibold text-white shadow-md shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition"
@@ -345,7 +344,6 @@ export default function FarmDetailsPage() {
                 ➕ إضافة حقل جديد لهذه المزرعة
               </Link>
 
-              {/* 🗑️ حذف المزرعة – نفس onClick */}
               <button
                 type="button"
                 onClick={handleDeleteFarm}
@@ -401,7 +399,6 @@ export default function FarmDetailsPage() {
               </p>
             </div>
 
-            {/* نفس رابط إضافة الحقل */}
             <Link
               href={`/farms/${farmId}/fields/new`}
               className="text-xs rounded-xl bg-[#0058E6] px-3 py-1.5 font-semibold text-white shadow-md shadow-[#0058E6]/40 hover:bg-[#1D7AF3] transition"
@@ -451,7 +448,6 @@ export default function FarmDetailsPage() {
                         </td>
                         <td className="px-3 py-2 rounded-l-2xl">
                           <div className="flex flex-wrap gap-2 justify-end">
-                            {/* نفس روابط عرض التفاصيل وتعديل */}
                             <Link
                               href={`/fields/${field.id}`}
                               className="text-[11px] rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-800 hover:bg-slate-50 transition"
@@ -472,7 +468,6 @@ export default function FarmDetailsPage() {
                 </table>
               </div>
 
-              {/* 🤖 تقارير المساعد الذكي وجداول الري لكل حقل */}
               {fields.some((f) => f.latest_report) && (
                 <div className="mt-6 space-y-3">
                   <h3 className="text-sm font-semibold text-slate-900">
@@ -512,7 +507,7 @@ export default function FarmDetailsPage() {
           )}
         </section>
 
-        {/* 🖼️ صور النباتات على مستوى المزرعة */}
+        {/* 🖼️ صور النباتات على مستوى المزرعة + تقرير المزرعة */}
         <section className="rounded-3xl bg-white border border-slate-200 p-5 md:p-6 space-y-4 shadow-sm">
           <div>
             <h2 className="text-sm md:text-base font-semibold mb-1 text-slate-900">
@@ -540,21 +535,33 @@ export default function FarmDetailsPage() {
           )}
 
           {!loadingImages && farmImages.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {farmImages.map((img) => (
-                <div
-                  key={img.id}
-                  className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-slate-100"
-                >
-                  <Image
-                    src={img.image_url}
-                    alt="صورة نبات من هذه المزرعة"
-                    fill
-                    className="object-cover"
-                  />
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {farmImages.map((img) => (
+                  <div
+                    key={img.id}
+                    className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-slate-100"
+                  >
+                    <Image
+                      src={img.image_url}
+                      alt="صورة نبات من هذه المزرعة"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* ✅ هنا نعرض تقرير الذكاء الاصطناعي للمزرعة تحت الصور */}
+              {farm.farm_level_report && (
+                <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-[11px] md:text-sm text-emerald-900 whitespace-pre-line">
+                  <p className="font-semibold mb-1">
+                    ملخص تحليل حالة النباتات في هذه المزرعة
+                  </p>
+                  <p>{farm.farm_level_report}</p>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </section>
       </div>
