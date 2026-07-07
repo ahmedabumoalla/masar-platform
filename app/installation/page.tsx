@@ -1,10 +1,10 @@
 import { ConsultationView } from "@/components/MasarUI"
 
-export default function ConsultationsPage() {
+export default function InstallationPage() {
   return (
     <main className="page">
       <div className="container">
-        <ConsultationView />
+        <ConsultationView installation />
       </div>
     </main>
   )

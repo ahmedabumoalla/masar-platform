@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 520" role="img" aria-label="أوراق شجرة مصابة بالاصفرار">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop stop-color="#e9f6ff"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+    <radialGradient id="leaf" cx=".4" cy=".35" r=".72">
+      <stop stop-color="#d8d744"/>
+      <stop offset=".55" stop-color="#8ab447"/>
+      <stop offset="1" stop-color="#3a7b35"/>
+    </radialGradient>
+  </defs>
+  <rect width="620" height="520" fill="url(#sky)"/>
+  <rect y="380" width="620" height="140" fill="#b18b62"/>
+  <path d="M0 380c90-28 144-14 222 4 82 19 146 11 226-10 75-20 120-18 172 6v140H0z" fill="#876542"/>
+  <path d="M302 442c10-74 5-145-8-216" stroke="#6f4728" stroke-width="24" stroke-linecap="round"/>
+  <path d="M298 258c-54-44-104-59-148-48 24 58 74 90 148 48Z" fill="url(#leaf)"/>
+  <path d="M304 244c-14-70 4-121 52-154 37 48 26 107-52 154Z" fill="url(#leaf)"/>
+  <path d="M326 254c55-38 111-45 166-18-34 54-89 69-166 18Z" fill="url(#leaf)"/>
+  <path d="M294 304c-61-20-107-8-140 34 50 31 99 20 140-34Z" fill="url(#leaf)"/>
+  <path d="M318 310c71-13 121 4 150 48-55 25-105 10-150-48Z" fill="url(#leaf)"/>
+  <path d="M174 216c38 18 74 30 124 42M356 92c-18 58-31 101-52 152M492 236c-57 9-110 15-166 18M154 338c45-5 88-16 140-34M468 358c-50-14-98-30-150-48" stroke="#315f2b" stroke-width="6" stroke-linecap="round" opacity=".45"/>
+  <g fill="#8a5d2e" opacity=".55">
+    <circle cx="196" cy="230" r="5"/><circle cx="226" cy="244" r="4"/><circle cx="348" cy="150" r="5"/><circle cx="375" cy="192" r="4"/><circle cx="410" cy="246" r="5"/><circle cx="238" cy="332" r="5"/>
+  </g>
+</svg>

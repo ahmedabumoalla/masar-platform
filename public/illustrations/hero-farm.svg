@@ -1,10 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820">
-<defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e5fbff"/><stop offset="1" stop-color="#ecfdf5"/></linearGradient><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#19b4d8"/><stop offset="1" stop-color="#0f7c57"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="30" stdDeviation="35" flood-opacity=".20"/></filter></defs>
-<rect width="1200" height="820" rx="60" fill="url(#a)"/>
-<path d="M0 560 C220 430 334 650 526 515 C715 382 846 436 1200 280 L1200 820 L0 820 Z" fill="#a7f3d0" opacity=".48"/>
-<path d="M0 644 C260 535 432 712 644 604 C828 510 1002 540 1200 465 L1200 820 L0 820 Z" fill="#67e8f9" opacity=".35"/>
-<g filter="url(#s)"><rect x="140" y="135" width="430" height="300" rx="36" fill="#fff"/><path d="M190 350 C250 270 308 320 354 240 C410 145 485 245 515 178" stroke="url(#b)" stroke-width="18" stroke-linecap="round" fill="none"/><rect x="190" y="190" width="120" height="20" rx="10" fill="#d1fae5"/><rect x="190" y="235" width="170" height="20" rx="10" fill="#ccfbf1"/><rect x="190" y="395" width="300" height="16" rx="8" fill="#ecfeff"/></g>
-<g filter="url(#s)"><rect x="675" y="160" width="310" height="430" rx="42" fill="#12372f"/><rect x="715" y="210" width="230" height="112" rx="26" fill="#eafff7"/><circle cx="780" cy="420" r="58" fill="#18b5d6"/><circle cx="890" cy="420" r="58" fill="#2dd4bf"/><rect x="740" y="520" width="180" height="24" rx="12" fill="#fff" opacity=".8"/></g>
-<g fill="none" stroke="#0f7c57" stroke-width="8" opacity=".58"><path d="M130 600 H1050"/><path d="M190 545 C265 615 342 615 430 545"/><path d="M610 545 C685 615 762 615 850 545"/></g>
-<circle cx="1010" cy="144" r="58" fill="#facc15" opacity=".42"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" role="img" aria-label="مزرعة ذكية">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e9fbff"/><stop offset="1" stop-color="#fbfff9"/></linearGradient>
+    <linearGradient id="field" x1="0" x2="1"><stop stop-color="#c9f2d7"/><stop offset="1" stop-color="#7ad49e"/></linearGradient>
+    <linearGradient id="device" x1="0" x2="1"><stop stop-color="#dbe5e7"/><stop offset=".5" stop-color="#ffffff"/><stop offset="1" stop-color="#aab8bb"/></linearGradient>
+  </defs>
+  <rect width="900" height="620" fill="url(#sky)"/>
+  <circle cx="750" cy="110" r="58" fill="#fff5b8" opacity=".95"/>
+  <path d="M0 420c150-80 278-70 420-20s290 56 480-36v256H0z" fill="url(#field)"/>
+  <path d="M60 520c150-70 280-70 430-10s250 55 350-2" fill="none" stroke="#0f7c57" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+  <path d="M140 458h620" stroke="#13b9d5" stroke-width="12" stroke-linecap="round" opacity=".55"/>
+  <g transform="translate(330 155)">
+    <rect x="94" y="0" width="32" height="280" rx="16" fill="#9aaeb1"/>
+    <rect x="78" y="-28" width="64" height="70" rx="18" fill="url(#device)"/>
+    <rect x="78" y="238" width="64" height="70" rx="18" fill="url(#device)"/>
+    <circle cx="110" cy="140" r="112" fill="url(#device)" stroke="#8fa1a5" stroke-width="8"/>
+    <circle cx="110" cy="140" r="78" fill="#13b9d5"/>
+    <rect x="91" y="72" width="38" height="136" rx="14" fill="#081e1a"/>
+    <text x="110" y="146" text-anchor="middle" font-family="monospace" font-size="22" fill="#ff463d" transform="rotate(90 110 146)">24.8</text>
+  </g>
+  <g fill="#0f7c57" opacity=".8">
+    <path d="M110 390c20-40 45-40 65 0-23-10-42-10-65 0z"/>
+    <path d="M685 410c18-36 42-36 60 0-20-9-40-9-60 0z"/>
+    <path d="M220 438c18-32 38-32 56 0-20-8-36-8-56 0z"/>
+  </g>
 </svg>

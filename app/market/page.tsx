@@ -1,10 +1,19 @@
 import ProductGrid from "@/components/ProductGrid"
+import { MarketSidebar, PageHeader, StoreBenefits } from "@/components/MasarUI"
 
 export default function MarketPage() {
   return (
-    <main>
-      <section className="pageHero"><div className="container"><div className="breadcrumbs">مسار / السوق الزراعي</div><h1>سوق زراعي منظم ومباشر</h1><p className="lead">منتجات الري والاستشعار والحماية والصيانة من موردين موثوقين مع تجربة طلب واضحة وسلة ودفع</p></div></section>
-      <section className="section"><div className="container"><ProductGrid /></div></section>
+    <main className="page">
+      <div className="container">
+        <PageHeader title="السوق الرقمي" text="تصفح المنتجات والخدمات الزراعية المناسبة لمزرعتك من موردين موثوقين." />
+        <div className="marketLayout">
+          <section>
+            <ProductGrid />
+            <StoreBenefits />
+          </section>
+          <MarketSidebar />
+        </div>
+      </div>
     </main>
   )
 }
