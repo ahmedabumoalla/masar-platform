@@ -1,0 +1,42 @@
+{
+  "groups": [
+    "TerrainSurface",
+    "Soil",
+    "BuriedPipes",
+    "SurfacePipes",
+    "Plants",
+    "Infrastructure"
+  ],
+  "glb_bytes": 1093292,
+  "mesh_objects": 32,
+  "triangles": 20442,
+  "web_bounds": {
+    "min": [
+      -12.0,
+      -2.4,
+      -9.006
+    ],
+    "max": [
+      12.0,
+      2.7933,
+      9.006
+    ]
+  },
+  "leaks": {
+    "A": [
+      -5,
+      0.4,
+      -3
+    ],
+    "B": [
+      4,
+      -1.05,
+      -3
+    ],
+    "C": [
+      4,
+      0.4,
+      4
+    ]
+  }
+}

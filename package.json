@@ -1,23 +1,32 @@
 {
-  "name": "masar-platform",
-  "version": "2.0.1",
+  "name": "masar-digital-twin",
   "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit"
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "tsx --test src/lib/simulation.test.ts src/lib/incident-report.test.ts src/lib/saudi-atlas.test.ts",
+    "test:atlas": "tsx --test src/lib/saudi-atlas.test.ts"
   },
   "dependencies": {
-    "@types/node": "22.10.7",
-    "@types/react": "18.3.18",
-    "@types/react-dom": "18.3.5",
-    "next": "15.5.19",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "typescript": "5.7.2",
-    "lucide-react": "latest"
+    "@fontsource/ibm-plex-sans-arabic": "^5.2.6",
+    "@fontsource/manrope": "^5.2.8",
+    "lucide-react": "^0.577.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.13.1",
+    "three": "^0.186.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.183.1",
+    "@vitejs/plugin-react": "^5.1.4",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0"
+  }
 }

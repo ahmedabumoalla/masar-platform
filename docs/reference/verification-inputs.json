@@ -1,0 +1,142 @@
+{
+  "capturedAt": "2026-09-21T23:31:50.258585+03:00",
+  "note": "Atlas full-width/modal build passed at 2026-09-21 23:31:01 +03; focused SSR local/regional dialog assertions passed. Atlas logic/data/test/lock/config unchanged: 5 tests reused from 23:25:10. Native browser interactions not run. Other input identities preserved.",
+  "inputs": [
+    {
+      "path": "src/App.tsx",
+      "sha256": "49AD1EC7091382DA0A55BA20C8DBD419F5C9C3C61298EE69B0EDDA462ED18BAA"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "6BA5FF3238CEEEB1DC60D55AF0967E5F6E1C74EA30A2FFD9AFEE4137BA02E521"
+    },
+    {
+      "path": "src/components/DeviceViewer.tsx",
+      "sha256": "DF8BCFC81EF05F9994058CE01B252BDCB8A9933AAD2C8DA80F8A2157F8C998C1"
+    },
+    {
+      "path": "src/components/FarmViewer.tsx",
+      "sha256": "978BB5E1FED0915916FD4F83D25C802D25296214DDC8254D3031FED048A59E12"
+    },
+    {
+      "path": "src/lib/three-stage.ts",
+      "sha256": "CE9BA9A65D2BE8F9407785755740E2280C855E4396C01C7A065AD25CF0F4B3C5"
+    },
+    {
+      "path": "src/lib/farm-effects.ts",
+      "sha256": "404C0207A990DAC1B96C09E7DBC6FDA7CD85ADB36840B4F0CED133DFEF639492"
+    },
+    {
+      "path": "src/lib/simulation.ts",
+      "sha256": "54618B2172774E3FE61052507EEFA416BC0D556D61F731715609809720B2CEFB"
+    },
+    {
+      "path": "src/lib/simulation.test.ts",
+      "sha256": "B2BF7489A48D1BA8FAF7F061E2C739378744A6EDA77816F28E28BE9A3475FEF1"
+    },
+    {
+      "path": "scripts/build_device.py",
+      "sha256": "1BEE401DAFD37AA4C34639C43D8CEE83290349BA68C8E0F8379797F2544936B0"
+    },
+    {
+      "path": "public/models/masar-device.glb",
+      "sha256": "F0BA833168DF64BF407C47AB82C566A289E41A8857434A134C2884DF1421B5B2"
+    },
+    {
+      "path": "public/models/masar-farm.glb",
+      "sha256": "50FF6F413960C6CBD2417C3C4CF2A361E72050990B657EECDDDCA454C33B6F4D"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "F3DD9557A8D0197A7A4D0E738CF770FCADF706EA85013030471DAFA7FD11F2D1"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "FBCA2E710FA4868503AC6747B3C7862516B3C1A134E8A2B1229FEAAF15D252FA"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "7CCB4DE58E23AA6BFB048D0EBF306A8D5A266C51574F5C7E579DB11067C8488A"
+    },
+    {
+      "path": "src/components/IncidentReportDialog.tsx",
+      "sha256": "FF0075E89B5A5EF47C2695A9090CB98FEF516538BFC49DB845F391AB9A3E163F"
+    },
+    {
+      "path": "src/components/incident-report.css",
+      "sha256": "6A7D78CF9BAF4C09D3BC7A9B2516E4F907CB9B1396646E0378F8510B8AEE8F5D"
+    },
+    {
+      "path": "src/lib/incident-report.ts",
+      "sha256": "1FE472D903D5F83E270A528E227A47359770A6F0A23D88C34712E696D4741173"
+    },
+    {
+      "path": "src/lib/incident-report.test.ts",
+      "sha256": "54EEB80B77EAF5B1F8E44866AF8739C4B0ECFAC201F4C8B0D78EE0FA021E8472"
+    },
+    {
+      "path": "package.json",
+      "sha256": "E03A2E057F3CCCB9073807363721E933F1984AC81934D2C8C9AFFECFBF2AF3E8"
+    },
+    {
+      "path": "src/components/Simulation.tsx",
+      "sha256": "E4D5A8BC7A00B004C6836F75F7C6539FA18E92B14750BADBA9A74E7AE57F78E0"
+    },
+    {
+      "path": "src/components/SimulationPanel.tsx",
+      "sha256": "04DD79FFE776F5751E0D4E5D7613B834A3D79A56AD9D0A4CF76CC1D30B9B8593"
+    },
+    {
+      "path": "src/components/simulation.css",
+      "sha256": "52924A051305E39F9A9F46AA40D46793E5FC035CC5F610BE843375FC2718C998"
+    },
+    {
+      "path": "index.html",
+      "sha256": "E92C9232059C42288B3D280F8B51A2B402F85DB7D47C37CCDD2A945EF6405B84"
+    },
+    {
+      "path": "src/components/SaudiAtlas.tsx",
+      "sha256": "FB548A9E2DABB4CC715C794D00A2AB9D849A5EE8FB9C37F23583F673EF375573"
+    },
+    {
+      "path": "src/components/saudi-atlas.css",
+      "sha256": "6DE2BAD8DE39A7D04FE963972DA67CC9CF27308AA8A822BC203CF321521444E2"
+    },
+    {
+      "path": "src/lib/saudi-atlas.ts",
+      "sha256": "719DCD540C41A39AB9FBCAE9D3CD30520E277A95C3B80441E070FE660E031ED1"
+    },
+    {
+      "path": "src/lib/saudi-atlas.test.ts",
+      "sha256": "A18FF1AC9BB64D99DEE00B5BC9F148D87315FEAB22CDF47FFABC3281CAE14203"
+    },
+    {
+      "path": "src/lib/saudi-agriculture.ts",
+      "sha256": "C7BCCFD9754B7726C931935E342A3628F33CF0568D6E796C7A3BB27BC6542BBC"
+    },
+    {
+      "path": "src/data/saudi-geography.json",
+      "sha256": "055BC0909BFB1330AFB1B33D55399C4F781A8EFBF87A0561181DBA2E940F11ED"
+    },
+    {
+      "path": "public/data/saudi-geography.json",
+      "sha256": "055BC0909BFB1330AFB1B33D55399C4F781A8EFBF87A0561181DBA2E940F11ED"
+    },
+    {
+      "path": "public/data/saudi-atlas-licenses.txt",
+      "sha256": "40F01A850D3CAF1AA56C400264B979CE9BC1680A85775E128D6291611D995847"
+    },
+    {
+      "path": "scripts/build-saudi-atlas.py",
+      "sha256": "57DBAB9FEE9D63597B022476EC8834C66EA536EF7865F9D50C3818FB5627C7A4"
+    },
+    {
+      "path": "scripts/fetch-saudi-atlas.py",
+      "sha256": "21FD0D1F5CCE7D6770B20E460F30132DBECB4DF75339195CBF1656DECC53B27B"
+    },
+    {
+      "path": "src/components/AtlasPlaceDialog.tsx",
+      "sha256": "EC8793CE282F8DAEF9D8C041AB792126F5AD0EBE6A4AB780370255855A0AD561"
+    }
+  ]
+}

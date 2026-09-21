@@ -1,0 +1,54 @@
+MASAR SAUDI AGRICULTURAL ATLAS — GEOGRAPHIC DATA ATTRIBUTION
+Reviewed 2026-09-21. Display geometry is illustrative, not cadastral or live.
+
+1. National background silhouette (ADM1, dissolved without regional borders)
+Source: geoBoundaries / OpenStreetMap contributors
+Boundary ID: SAU-ADM1-25081817; represented year: 2017
+License: Open Data Commons Open Database License 1.0 (ODbL)
+https://opendatacommons.org/licenses/odbl/1-0/
+https://www.openstreetmap.org/copyright
+Metadata and original download links:
+https://www.geoboundaries.org/api/current/gbOpen/SAU/ADM1/
+
+2. Regional outlines and representative governorate points (ADM2)
+Source: geoBoundaries / OpenStreetMap contributors
+Boundary ID: SAU-ADM2-3984122; represented year: 2021
+License reported by geoBoundaries: Creative Commons Attribution-ShareAlike 2.0
+https://creativecommons.org/licenses/by-sa/2.0/
+Metadata and original download links:
+https://www.geoboundaries.org/api/current/gbOpen/SAU/ADM2/
+Pinned raw source:
+https://github.com/wmgeolab/geoBoundaries/tree/9469f09/releaseData/gbOpen/SAU/ADM2
+
+Adaptations: Arabic labels, regional assignment, county union by region,
+24-degree standard-parallel equirectangular projection, subpixel simplification,
+interior representative points. Regional outlines are dissolved from ADM2
+instead of mixing incompatible ADM1/ADM2 vintages (notably Al Birk, Sharurah
+and Farat Ghamid Az Zinad). The separately derived ADM1 silhouette only fills
+background coverage gaps. The Ahsa point represents its oasis rather than
+the desert polygon centre. Points are not real farms, wells or sensors.
+The adapted national background layer remains offered under ODbL 1.0;
+the separate adapted ADM2 outlines/points remain offered under CC BY-SA 2.0.
+Download the adapted geographic database: /data/saudi-geography.json
+
+3. Supplementary locations
+Dammam (regional capital), Al Bayda, Al Muwayh, Al Amwah and Abanat were
+missing from the ADM2 input and added at approximate administrative-seat
+locations. These additions do not amend the older boundary geometries.
+Administrative names/context:
+https://saudipedia.com/قائمة-محافظات-المنطقة-الشرقية
+https://saudipedia.com/محافظة-البيضاء
+https://saudipedia.com/محافظة-المويه
+https://saudipedia.com/مناطق-السعودية
+Muwayh geographic reference: https://www.geonames.org/409993/al-muwayh.html
+Abanat location reference: https://postalcodes.info/postal-codes/saudi-arabia/codes/54
+Al Bayda official emirate map marker:
+https://www.sharqiah.gov.sa/governorates/al-baidhah
+Al Amwah location reference: https://www.geonames.org/12545858/al-amwah.html
+GeoNames location data: https://www.geonames.org/about.html (CC BY 4.0)
+
+4. Agricultural information
+Separately authored editorial summaries, linked to MEWA, SPA, RCU and other
+named primary publications inside each profile. No statistical dominance or
+live rainfall/groundwater measurements are claimed. Regional evidence is
+labelled as regional; it is not imputed to individual governorates.
