@@ -1,0 +1,75 @@
+name: Publish current Masar source
+
+on:
+  push:
+    branches: [codex/current-masar-20260921]
+    paths: [.github/workflows/sync-current-source.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-current-masar-source
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify and stage the reviewed source archive
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, pathlib, shutil, stat, zipfile
+          source = pathlib.Path('masar-current-source.zip')
+          expected = '9311be88042efecdaa9ee7952ab389fbf7e58ffb20e2c296a86fc22614c4081c'
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == expected, 'Unexpected source archive'
+          destination = pathlib.Path(os.environ['RUNNER_TEMP']) / 'masar-reviewed-source'
+          destination.mkdir()
+          with zipfile.ZipFile(source) as archive:
+              entries = archive.infolist()
+              assert len(entries) == 61, 'Unexpected file count'
+              assert sum(entry.file_size for entry in entries) < 100_000_000
+              seen = set()
+              for entry in entries:
+                  path = pathlib.PurePosixPath(entry.filename)
+                  assert not path.is_absolute() and '..' not in path.parts
+                  assert not any(part in ('.git', '.github', 'node_modules', 'dist', '.tools') for part in path.parts)
+                  assert '\\' not in entry.filename and ':' not in entry.filename
+                  assert not stat.S_ISLNK(entry.external_attr >> 16)
+                  assert entry.filename not in seen
+                  seen.add(entry.filename)
+              archive.extractall(destination)
+          for required in ('package.json', 'package-lock.json', 'vercel.json', 'src/App.tsx'):
+              assert (destination / required).is_file(), required
+          PY
+      - name: Replace the old source while preserving Git history
+        shell: bash
+        run: |
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = 'f0f4e473e8a7c3d3c917c0d36c85c9c001af1c3f'
+          git switch --force-create main origin/main
+          git rm -r -- .
+          cp -a "$RUNNER_TEMP/masar-reviewed-source/." .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.2
+          cache: npm
+      - name: Verify clean Linux install, tests and production build
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Publish the verified source
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+          git diff --cached --check
+          git commit -m "Update Masar platform with current digital twin and Saudi atlas"
+          git push origin HEAD:main
+          printf 'Published commit: %s\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+
