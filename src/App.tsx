@@ -3,6 +3,7 @@ import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { Activity, ArrowDown, ArrowLeft, ArrowUpLeft, ChevronLeft, Cpu, Gauge, Layers3, Radio, ScanLine, ShieldCheck, Waves, Wifi, Wrench, Zap } from 'lucide-react'
 import { createInitialState, simulationReducer } from './lib/simulation'
 import Simulation from './components/Simulation'
+import InstallationRequestDialog from './components/InstallationRequestDialog'
 
 const DeviceViewer = lazy(() => import('./components/DeviceViewer'))
 const SaudiAtlas = lazy(() => import('./components/SaudiAtlas'))
@@ -18,6 +19,7 @@ function Header() {
 }
 
 function Home() {
+  const [installationOpen, setInstallationOpen] = useState(false)
   return <>
     <main id="main" tabIndex={-1} className="home-main">
       <section className="hero" aria-labelledby="hero-heading">
@@ -25,7 +27,7 @@ function Home() {
           <div className="eyebrow"><span className="short-line" /> ذكاء يسري مع الماء</div>
           <h1 id="hero-heading">لكل قطرة ماء<br /><span>مســار</span><span className="title-period" /></h1>
           <p className="hero-description">رحلة الماء تستحق أن تُرى<br />جهاز ذكي يراقب تدفّقها ويكشف الخلل<br className="desktop-break" /> لتصل كل قطرة إلى مكانها</p>
-          <div className="hero-ctas"><Link to="/simulation" className="button primary">عِش تجربة مسار <ArrowUpLeft size={20} /></Link><Link to="/device" className="text-link">اكتشف الجهاز <ChevronLeft size={17} /></Link></div>
+          <div className="hero-ctas"><Link to="/simulation" className="button primary">عِش تجربة مسار <ArrowUpLeft size={20} /></Link><button type="button" className="button secondary hero-installation-button" aria-haspopup="dialog" onClick={() => setInstallationOpen(true)}>طلب تركيب الجهاز <Wrench size={18} aria-hidden="true" /></button><Link to="/device" className="text-link">اكتشف الجهاز <ChevronLeft size={17} /></Link></div>
           <div className="hero-footnote"><span className="status-dot" /> من الاستشعار إلى القرار <span className="line-divider" /><span>تجربة تفاعلية ثلاثية الأبعاد</span></div>
         </div>
         <div className="hero-product">
@@ -46,6 +48,7 @@ function Home() {
       <section className="experience-link"><span><span className="status-dot" /> شاهد ما يحدث فوق الأرض وتحتها</span><Link to="/simulation">ادخل المزرعة الافتراضية <ArrowDown size={16} /></Link><span className="mono">DESIGNED AROUND EVERY DROP</span></section>
     </main>
     <footer className="home-footer"><span>مسار <span className="dot-separator">·</span> لكل قطرة ماء مسار</span><span>تجربة توضيحية للري الذكي</span></footer>
+    {installationOpen && <InstallationRequestDialog onClose={() => setInstallationOpen(false)} />}
   </>
 }
 

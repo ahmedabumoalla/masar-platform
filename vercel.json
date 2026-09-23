@@ -3,7 +3,7 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!assets/|models/|brand/|images/|data/).*)", "destination": "/index.html" }],
+  "rewrites": [{ "source": "/((?!api(?:/|$)|assets/|models/|brand/|images/|data/).*)", "destination": "/index.html" }],
   "headers": [{
     "source": "/(.*)",
     "headers": [

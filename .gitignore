@@ -8,3 +8,5 @@ dist/
 !.env.example
 *.blend1
 *.log
+
+.vercel/

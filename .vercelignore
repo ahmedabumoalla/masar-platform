@@ -1,0 +1,9 @@
+.tools/
+.env*
+docs/
+assets/blender/
+scripts/
+**/*.test.ts
+**/*.blend
+**/*.blend1
+*.log

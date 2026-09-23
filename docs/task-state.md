@@ -1,6 +1,25 @@
 # Masar — current task
 
-Updated 2026-09-21 23:31 +03:00, workspace C:/Projects/masar, full-width atlas with place dialogs completed locally, no Git repository or public deployment
+Updated 2026-09-23, workspace C:/Projects/masar; installation request feature verified on a Vercel preview, GitHub/production publication in progress
+
+## Latest change — device installation requests
+- Home hero now has a dedicated installation CTA and a responsive native RTL dialog with seven required fields: applicant name/email/mobile, Google Maps link, device quantity, farm area in square metres and plants. Keyboard/focus restoration, internal scrolling, 16px inputs, 44px controls, inline validation/error summary, pending guard and success confirmation are source-reviewed
+- Real `POST /api/installation-requests` persists records in private Vercel Blob store `masar-installation-requests` connected only to this project's Production/Preview. Success follows durable storage; duplicate retries preserve the original object; personal data is never stored in localStorage, returned in responses or logged. Details/operator access: `docs/installation-requests.md`
+- Server validates all fields and request origin/content type, caps body size, rejects a honeypot and provides bounded per-instance throttling. This is not a distributed rate limit. No email recipient was supplied; records are available in private Vercel Storage, with no email notifications
+- RUN 2026-09-23 local Node 20.20.2: `npm test` 27/27 pass (444.8573 ms), then `npm run build` strict TypeScript + Vite pass. Lockfile now includes @vercel/blob 2.8.0; npm audit during install reported 0 vulnerabilities. The pre-existing Three.js chunk-size warning remains
+- An initial preview passed its build but its function failed to resolve .ts imports after deployment. Corrected server imports to .js specifiers. RUN affected `npm run test:installation` 8/8 pass (277.592 ms) and `npx tsc -b` pass. Unchanged frontend build and remaining 19 tests remain valid
+- RUN final preview build on Vercel Node 24, deployment `dpl_46GXzHj2JrsXM9dmpAuydkMUNrF9`, READY. Preview POST returned 201 success at 2026-09-23 04:06 +03:00. Authenticated Blob read verified all seven synthetic fields; anonymous read returned 403 at 04:06:47 +03:00. No real customer data was used
+- Preview: https://masar-platform-mbrf7pjtf-ahmedabumoallas-projects.vercel.app. NOT RUN browser rendering/interaction; UI review was source-based. Production verification and exact synthetic-record cleanup remain pending publication
+- CLI authentication is now available for GitHub ahmedabumoalla and Vercel ahmedabumoallas-projects. Git working checkout is `.tools/release-checkout`; the root still has no .git. Local `.env.local`, `.vercel` and `.tools` contain excluded tooling/configuration and must never be uploaded to Git
+
+## Latest operation — publish current project to GitHub
+- User explicitly authorized replacing the old remote project with the current local Masar platform through their authenticated browser. Main updated without force-push, preserving prior history: https://github.com/ahmedabumoalla/masar-platform/commit/eb28187c053ce0ad9bf0d3cb4a8facb0458eab12
+- Published 61 reviewed files including React/Vite source, interactive atlas, full-screen simulation, original brand assets, editable Blender scenes, exported GLBs and reproduction scripts. Excluded dependencies, build output, local tools, logs, reference PDF images and secrets. Archive SHA-256: 9311be88042efecdaa9ee7952ab389fbf7e58ffb20e2c296a86fc22614c4081c
+- Release preparation: vercel.json explicitly selects Vite, npm ci and dist, and excludes data/ from the SPA rewrite; .gitignore excludes local tools and Python caches; README includes the atlas. No app behavior was changed during publishing
+- RUN 2026-09-22 00:06 +03:00 GitHub Actions on ubuntu-latest, application Node 20.20.2: archive identity/path checks, npm ci, npm test, npm run build, whitespace check and fast-forward push passed. Run duration 27s (job 24s): https://github.com/ahmedabumoalla/masar-platform/actions/runs/35655150902
+- Earlier run 35654923108 passed install/tests/build but stopped before committing because Git treated Windows CRLF as trailing whitespace. Resolved by enabling cr-at-eol in the whitespace check, preserving the exact source bytes; final run passed. GitHub emitted a nonfatal Node 20 action-runtime deprecation warning
+- Browser file-picker automation remained blocked; user manually selected the reviewed archive. Archive and one-shot publishing workflow remain on codex/current-masar-20260921 only, not main. Workflow refuses unexpected archive content or a changed main baseline
+- NOT VERIFIED: current public Vercel deployment or new live-site/browser application behavior. GitHub success is not deployment evidence. This publication record and handoff note were written locally after the published source snapshot
 
 ## Latest change — full-width atlas and popup details
 - Removed the permanent atlas sidebar; the map now spans the section width on desktop/mobile. Region, governorate and search controls occupy a compact toolbar above it

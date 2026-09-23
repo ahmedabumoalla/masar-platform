@@ -1,0 +1,43 @@
+.hero-ctas{flex-wrap:wrap;gap:12px 20px}
+.hero-installation-button{border-color:var(--blue);color:var(--blue);background:var(--paper)}
+.installation-dialog{--installation-gap:24px;width:min(620px,calc(100% - 24px));max-width:none;max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid var(--line);border-radius:var(--radius);color:var(--ink);background:var(--paper);box-shadow:0 24px 80px #17123726;overflow:hidden}
+.installation-dialog[open]{display:flex;flex-direction:column}
+.installation-dialog::backdrop{background:#17123766}
+.installation-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px var(--installation-gap) 20px;border-bottom:1px solid var(--line);flex-shrink:0}
+.installation-kicker{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--blue);margin-bottom:8px}
+.installation-heading h2{font-size:25px;line-height:1.4;font-weight:600}
+.installation-close{display:grid;place-items:center;min-width:44px;min-height:44px;border-radius:7px;background:var(--subtle);align-self:flex-start}
+.installation-close:hover{background:var(--line)}
+.installation-form{display:flex;flex-direction:column;min-height:0}
+.installation-honeypot{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.installation-body{overflow:auto;overscroll-behavior:contain;padding:20px var(--installation-gap) 24px;scroll-padding-block:16px}
+.installation-intro{font-size:14px;line-height:1.8;color:var(--muted);margin-bottom:24px}
+.installation-intro>span{display:block;font-size:11px;margin-top:3px}
+.installation-form fieldset{min-width:0;margin:0;padding:0;border:0}
+.installation-form fieldset+fieldset{margin-top:28px}
+.installation-form legend{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-bottom:16px;padding:0}
+.installation-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.installation-field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.installation-wide{grid-column:1/-1}
+.installation-field label{font-size:12px;font-weight:500;line-height:1.7}
+.installation-field input{width:100%;min-width:0;min-height:46px;padding:10px 12px;border:1px solid #b8c5d6;border-radius:7px;color:var(--ink);background:var(--paper);font:inherit;font-size:16px;line-height:1.5;scroll-margin:16px}
+.installation-field input::placeholder{color:var(--muted);font-size:13px;opacity:1}
+.installation-field input:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-color:var(--blue)}
+.installation-field input[aria-invalid=true]{border-color:var(--warning)}
+.installation-field-hint{font-size:11px;color:var(--muted);line-height:1.8}
+.installation-field-hint a{display:inline-flex;align-items:center;gap:4px;color:var(--blue);min-height:32px;text-decoration:underline;text-underline-offset:3px;margin-inline-start:6px}
+.installation-field-error{font-size:12px;color:var(--warning);line-height:1.7}
+.installation-errors{border-inline-start:3px solid var(--warning);padding:12px 16px;margin-bottom:20px;background:var(--subtle);font-size:13px;line-height:1.8}
+.installation-errors ul{margin:8px 0 0;padding-inline-start:18px}
+.installation-errors a{text-decoration:underline;text-underline-offset:3px}
+.installation-footer{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px var(--installation-gap) max(16px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper)}
+.installation-footer p{font-size:11px;line-height:1.8;color:var(--muted);max-width:190px}
+.installation-footer .button{flex-shrink:0;gap:10px}
+.installation-success{padding:44px 24px;text-align:center;overflow:auto}
+.installation-success-icon{display:inline-grid;place-items:center;width:60px;height:60px;border-radius:50%;background:var(--subtle);color:var(--green);margin-bottom:20px}
+.installation-success h3{font-size:22px;line-height:1.6}
+.installation-success p{font-size:14px;color:var(--muted);line-height:1.9;margin:10px 0 28px}
+.installation-spinner{animation:installation-spin 1s linear infinite}
+@keyframes installation-spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){.installation-dialog{--installation-gap:18px;max-height:calc(100dvh - 20px)}.installation-heading{padding-top:18px;padding-bottom:16px}.installation-heading h2{font-size:22px}.installation-grid{grid-template-columns:minmax(0,1fr)}.installation-footer{flex-direction:column-reverse;gap:8px}.installation-footer .button{width:100%}.installation-footer p{max-width:none;text-align:center}.installation-body{padding-top:16px}.installation-success h3{font-size:20px}.hero-installation-button{min-height:48px}}
+@media(prefers-reduced-motion:reduce){.installation-spinner{animation:none}}
